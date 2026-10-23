@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة عنبر الدجاج البياض</title>
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            --primary-light: #4caf50;
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 70px;
+        }
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .container {
+            max-width: 850px;
+            margin: 15px auto;
+            padding: 0 15px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        h2 {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            border-bottom: 2px solid #e8f5e9;
+            padding-bottom: 5px;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.3s;
+        }
+        input:focus, select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.2);
+        }
+        .row-inputs {
+            display: flex;
+            gap: 10px;
+        }
+        .row-inputs .form-group {
+            flex: 1;
+        }
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #1b5e20;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            min-width: 750px;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+        th {
+            background-color: #e8f5e9;
+            color: var(--primary-color);
+        }
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            display: flex;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            font-size: 0.85rem;
+            color: #666;
+            cursor: pointer;
+            transition: color 0.3s, background 0.3s;
+            font-weight: 600;
+        }
+        .nav-item.active {
+            color: var(--primary-color);
+            background-color: #f1f8e9;
+            border-top: 3px solid var(--primary-color);
+        }
+
+        .cloud-status { padding:8px 12px; text-align:center; font-size:.85rem; background:#e8f5e9; color:#1b5e20; }
+        .cloud-overlay { position:fixed; inset:0; z-index:3000; background:rgba(244,246,248,.98); display:flex; align-items:center; justify-content:center; padding:18px; }
+        .cloud-box { width:100%; max-width:430px; background:white; border-radius:14px; padding:22px; box-shadow:0 5px 24px #0002; }
+        .cloud-box h2 { margin-bottom:12px; }
+        .cloud-box p { line-height:1.7; margin-bottom:12px; }
+        .cloud-box input { margin-bottom:10px; }
+        .cloud-secondary { background:#546e7a; }
+        .cloud-message { margin-top:12px; font-size:.9rem; line-height:1.6; }
+
+    </style>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+    <div id="cloudStatus" class="cloud-status" style="display:none">☁️ يلزم تسجيل الدخول لاستخدام التطبيق <button id="cloudLogout" class="cloud-secondary" style="display:none;margin-right:10px;padding:5px 10px" onclick="cloudSignOut()">تسجيل الخروج</button></div>
+    <div id="cloudLogin" class="cloud-overlay" style="display:flex">
+      <div class="cloud-box">
+        <h2>🔐 تسجيل الدخول مطلوب</h2>
+        <p>يجب تسجيل الدخول أو إنشاء حساب جديد للوصول إلى التطبيق وحفظ بياناتك سحابياً. لا يمكن المتابعة دون حساب.</p>
+        <div class="form-group"><label for="cloudEmail">البريد الإلكتروني</label><input id="cloudEmail" type="email" autocomplete="username" placeholder="name@example.com"></div>
+        <div class="form-group"><label for="cloudPassword">كلمة المرور (6 أحرف على الأقل)</label><input id="cloudPassword" type="password" autocomplete="current-password" placeholder="كلمة المرور"></div>
+        <button onclick="cloudSignIn()">تسجيل الدخول</button>
+        <button class="cloud-secondary" onclick="cloudSignUp()">إنشاء حساب جديد</button>
+        <div id="cloudMessage" class="cloud-message"></div>
+      </div>
+    </div>
+
+
+    <header>إدارة عنبر الدجاج البياض</header>
+
+    <div class="container">
+        
+        <!-- Tab 1: Daily Entry -->
+        <div id="tab-daily" class="tab-content">
+            <div class="card">
+                <h2>تسجيل البيانات اليومية</h2>
+                <div class="form-group">
+                    <label for="entry-date">تاريخ اليوم</label>
+                    <input type="date" id="entry-date">
+                </div>
+
+                <h3 style="font-size: 1rem; margin: 15px 0 8px; color: #555;">البطارية 1</h3>
+                <div class="row-inputs">
+                    <div class="form-group">
+                        <label>عدد الأطباق</label>
+                        <input type="number" id="b1-eggs" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>عدد الوفيات</label>
+                        <input type="number" id="b1-deaths" min="0" value="0">
+                    </div>
+                </div>
+
+                <h3 style="font-size: 1rem; margin: 15px 0 8px; color: #555;">البطارية 2</h3>
+                <div class="row-inputs">
+                    <div class="form-group">
+                        <label>عدد الأطباق</label>
+                        <input type="number" id="b2-eggs" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>عدد الوفيات</label>
+                        <input type="number" id="b2-deaths" min="0" value="0">
+                    </div>
+                </div>
+
+                <h3 style="font-size: 1rem; margin: 15px 0 8px; color: #555;">البطارية 3</h3>
+                <div class="row-inputs">
+                    <div class="form-group">
+                        <label>عدد الأطباق</label>
+                        <input type="number" id="b3-eggs" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>عدد الوفيات</label>
+                        <input type="number" id="b3-deaths" min="0" value="0">
+                    </div>
+                </div>
+
+                
+                <h3 style="font-size: 1rem; margin: 15px 0 8px; color: #555;">الأطباق المستهلكة أو الضائعة</h3>
+                <div class="form-group">
+                    <label>العدد</label>
+                    <input type="number" id="wasted-eggs" min="0" value="0">
+                </div>
+
+                <button onclick="saveDailyData()">حفظ البيانات اليومية</button>
+            </div>
+        </div>
+
+        <!-- Tab 2: Flock Info -->
+        <div id="tab-flock" class="tab-content active">
+            <div class="card">
+                <h2>إعدادات ومعلومات الدورة</h2>
+                
+                <div class="form-group">
+                    <label for="flock-name">اسم الدورة</label>
+                    <input type="text" id="flock-name" placeholder="مثال: الدورة الأولى 2026">
+                </div>
+
+                <div class="form-group">
+                    <label for="bird-breed">نوع الطيور</label>
+                    <input type="text" id="bird-breed" placeholder="مثال: هاي لاين / لومان">
+                </div>
+
+                <div class="form-group">
+                    <label for="bird-count">عدد الطيور الإجمالي</label>
+                    <input type="number" id="bird-count" value="13000">
+                </div>
+
+                <div class="form-group">
+                    <label for="start-date">تاريخ البداية</label>
+                    <input type="date" id="start-date">
+                </div>
+
+                <div class="form-group">
+                    <label for="start-age">عمر الطيور عند البداية (بالأيام)</label>
+                    <input type="number" id="start-age" value="126">
+                </div>
+
+                <button onclick="saveFlockInfo()">حفظ بيانات الدورة</button>
+            </div>
+        </div>
+
+        <!-- Tab 3: View Data & Excel Summary -->
+        <div id="tab-view" class="tab-content">
+            <div class="card">
+                <h2>سجل البيانات الشامل (مطابق تماماً لملف Excel)</h2>
+                <div id="records-list" style="overflow-x: auto;">
+                    <!-- Table loaded dynamically -->
+                </div>
+                <button onclick="exportToExcel()" style="background-color: #1976d2; margin-top: 15px;">تصدير إلى ملف إكسل (Excel)</button>
+                <button onclick="exportToPDF()" style="background-color: #d32f2f; margin-top: 10px;">تصدير إلى ملف PDF (مرتب شهرياً)</button>
+                
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('flock', this)">بيانات الدورة</div>
+        <div class="nav-item" onclick="switchTab('daily', this)">التسجيل اليومي</div>
+        <div class="nav-item" onclick="switchTab('view', this)">عرض البيانات</div>
+    </div>
+
+    <script>
+        document.getElementById('entry-date').valueAsDate = new Date();
+
+        // When date changes, load existing record for that date if any
+        document.getElementById('entry-date').addEventListener('change', function() {
+            const selectedDate = this.value;
+            let records = JSON.parse(localStorage.getItem('daily_records') || '[]');
+            const record = records.find(r => r.date === selectedDate);
+            if (record) {
+                document.getElementById('b1-eggs').value = record.b1.eggs;
+                document.getElementById('b1-deaths').value = record.b1.deaths;
+                document.getElementById('b2-eggs').value = record.b2.eggs;
+                document.getElementById('b2-deaths').value = record.b2.deaths;
+                document.getElementById('b3-eggs').value = record.b3.eggs;
+                document.getElementById('b3-deaths').value = record.b3.deaths;
+                document.getElementById('wasted-eggs').value = record.wasted || 0;
+            } else {
+                document.getElementById('b1-eggs').value = 0;
+                document.getElementById('b1-deaths').value = 0;
+                document.getElementById('b2-eggs').value = 0;
+                document.getElementById('b2-deaths').value = 0;
+                document.getElementById('b3-eggs').value = 0;
+                document.getElementById('b3-deaths').value = 0;
+                document.getElementById('wasted-eggs').value = 0;
+            }
+        });
+
+        document.getElementById('start-date').valueAsDate = new Date();
+
+        window.onload = function() {
+            if(localStorage.getItem('flock_name')) document.getElementById('flock-name').value = localStorage.getItem('flock_name');
+            if(localStorage.getItem('bird_breed')) document.getElementById('bird-breed').value = localStorage.getItem('bird_breed');
+            if(localStorage.getItem('bird_count')) document.getElementById('bird-count').value = localStorage.getItem('bird_count');
+            if(localStorage.getItem('start_date')) document.getElementById('start-date').value = localStorage.getItem('start_date');
+            if(localStorage.getItem('start_age')) document.getElementById('start-age').value = localStorage.getItem('start_age');
+        };
+
+        function switchTab(tabId, element) {
+            if (tabId === 'view') {
+                loadRecords();
+            }
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.getElementById('tab-' + tabId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        function saveFlockInfo() {
+            localStorage.setItem('flock_name', document.getElementById('flock-name').value);
+            localStorage.setItem('bird_breed', document.getElementById('bird-breed').value);
+            localStorage.setItem('bird_count', document.getElementById('bird-count').value);
+            localStorage.setItem('start_date', document.getElementById('start-date').value);
+            localStorage.setItem('start_age', document.getElementById('start-age').value);
+            alert('تم حفظ بيانات الدورة بنجاح!');
+        }
+
+        function saveDailyData() {
+            const date = document.getElementById('entry-date').value;
+            const data = {
+                date: date,
+                b1: { eggs: parseFloat(document.getElementById('b1-eggs').value) || 0, deaths: parseFloat(document.getElementById('b1-deaths').value) || 0 },
+                b2: { eggs: parseFloat(document.getElementById('b2-eggs').value) || 0, deaths: parseFloat(document.getElementById('b2-deaths').value) || 0 },
+                b3: { eggs: parseFloat(document.getElementById('b3-eggs').value) || 0, deaths: parseFloat(document.getElementById('b3-deaths').value) || 0 },
+                wasted: parseFloat(document.getElementById('wasted-eggs').value) || 0
+            };
+            
+            let records = JSON.parse(localStorage.getItem('daily_records') || '[]');
+            const existingIndex = records.findIndex(r => r.date === date);
+            if (existingIndex >= 0) {
+                records[existingIndex] = data;
+            } else {
+                records.push(data);
+            }
+            records.sort((a, b) => new Date(a.date) - new Date(b.date));
+            localStorage.setItem('daily_records', JSON.stringify(records));
+            
+            alert('تم تسجيل بيانات يوم ' + date + ' بنجاح!');
+        }
+
+        
+        function editRecord(dateStr) {
+            document.getElementById('entry-date').value = dateStr;
+            // Trigger change event to load values
+            document.getElementById('entry-date').dispatchEvent(new Event('change'));
+            // Switch to daily tab
+            switchTab('daily', document.querySelectorAll('.nav-item')[0]);
+        }
+
+        
+        function loadRecords() {
+            const listDiv = document.getElementById('records-list');
+            let records = JSON.parse(localStorage.getItem('daily_records') || '[]');
+            const startDateStr = localStorage.getItem('start_date') || document.getElementById('start-date').value;
+            const totalBirds = parseFloat(localStorage.getItem('bird_count')) || 13000;
+            
+            if (records.length === 0) {
+                listDiv.innerHTML = '<p style="text-align: center; color: #777; padding: 20px;">لا توجد بيانات مسجلة حتى الآن.</p>';
+                return;
+            }
+
+            const startDate = new Date(startDateStr);
+            
+            // Map records with calculated day and week and accumulated deaths
+            let accumulatedDeaths = 0;
+            let processedRecords = records.map(r => {
+                const rDate = new Date(r.date);
+                const diffTime = rDate - startDate;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                const dayNum = diffDays > 0 ? diffDays : 1;
+                const weekNum = Math.floor((dayNum - 1) / 7) + 1;
+                const totalEggs = r.b1.eggs + r.b2.eggs + r.b3.eggs;
+                const totalDeaths = r.b1.deaths + r.b2.deaths + r.b3.deaths;
+                
+                accumulatedDeaths += totalDeaths;
+                const remainingBirds = Math.max(0, totalBirds - accumulatedDeaths);
+
+                return { ...r, dayNum, weekNum, totalEggs, totalDeaths, accumulatedDeaths, remainingBirds };
+            });
+
+            // Calculate weekly totals and weekly average remaining birds
+            let weeklyData = {};
+            processedRecords.forEach(r => {
+                if (!weeklyData[r.weekNum]) {
+                    weeklyData[r.weekNum] = { eggs: 0, totalRemaining: 0, count: 0 };
+                }
+                weeklyData[r.weekNum].eggs += r.totalEggs;
+                weeklyData[r.weekNum].totalRemaining += r.remainingBirds;
+                weeklyData[r.weekNum].count += 1;
+            });
+
+            let html = `<table>
+                <tr>
+                    <th>اليوم</th>
+                    <th>التاريخ</th>
+                    <th>الأسبوع</th>
+                    <th>ب 1 (أطباق/وفيات)</th>
+                    <th>ب 2 (أطباق/وفيات)</th>
+                    <th>ب 3 (أطباق/وفيات)</th>
+                    <th>إجمالي العنبر (أطباق/وفيات)</th>
+                    <th>الطيور المتبقية</th>
+                    <th>أطباق مستهلكة / ضائعة</th>
+                    <th>نسبة الإنتاج اليومية (%)</th>
+                    <th>إجمالي أطباق الأسبوع</th>
+                    <th>نسبة الإنتاج الأسبوعية (%)</th>
+                    <th>إجراء</th>
+                </tr>`;
+            
+            processedRecords.forEach(r => {
+                const prodRateDaily = r.remainingBirds > 0 ? ((r.totalEggs * 30) / r.remainingBirds * 100).toFixed(2) : 0;
+                
+                const weeklyTotalEggs = weeklyData[r.weekNum] ? weeklyData[r.weekNum].eggs : 0;
+                const avgWeeklyRemaining = weeklyData[r.weekNum] ? (weeklyData[r.weekNum].totalRemaining / weeklyData[r.weekNum].count) : totalBirds;
+                const prodRateWeekly = avgWeeklyRemaining > 0 ? ((weeklyTotalEggs * 30) / (avgWeeklyRemaining * 7) * 100).toFixed(2) : 0;
+
+                html += `<tr>
+                    <td>${r.dayNum}</td>
+                    <td>${r.date}</td>
+                    <td>${r.weekNum}</td>
+                    <td>${r.b1.eggs} / ${r.b1.deaths}</td>
+                    <td>${r.b2.eggs} / ${r.b2.deaths}</td>
+                    <td>${r.b3.eggs} / ${r.b3.deaths}</td>
+                    <td><b>${r.totalEggs}</b> / <b>${r.totalDeaths}</b></td>
+                    <td><b>${r.remainingBirds}</b></td>
+                    <td>${r.wasted || 0}</td>
+                    <td>${prodRateDaily}%</td>
+                    <td><b>${weeklyTotalEggs}</b></td>
+                    <td><b>${prodRateWeekly}%</b></td>
+                    <td><button onclick="editRecord('${r.date}')" style="padding: 4px 8px; font-size: 0.75rem; margin-top: 0; background-color: #1976d2;">تعديل</button></td>
+                </tr>`;
+            });
+
+            // Grand totals
+            let grandTotalEggs = 0;
+            let finalAccumulatedDeaths = 0;
+            processedRecords.forEach(r => {
+                grandTotalEggs += r.totalEggs;
+                finalAccumulatedDeaths = r.accumulatedDeaths;
+            });
+            
+            const finalRemainingBirds = Math.max(0, totalBirds - finalAccumulatedDeaths);
+            const totalDaysCount = processedRecords.length;
+            const overallProdRate = (totalDaysCount > 0 && finalRemainingBirds > 0) ? ((grandTotalEggs * 30) / (finalRemainingBirds * totalDaysCount) * 100).toFixed(2) : 0;
+
+            html += `<tr style="background-color: #f1f8e9; font-weight: bold;">
+                <td colspan="6" style="text-align: left; padding: 10px;">الإجمالي الكلي / المتبقي:</td>
+                <td><b>${grandTotalEggs}</b> / <b>${finalAccumulatedDeaths}</b></td>
+                <td><b>${finalRemainingBirds}</b></td>
+                <td>-</td>
+                <td>-</td>
+                <td>نسبة الإنتاج الكلية: <b>${overallProdRate}%</b></td>
+                <td colspan="2">-</td>
+            </tr>`;
+
+            html += '</table>';
+            listDiv.innerHTML = html;
+        }
+
+
+
+        
+        
+        function exportToPDF() {
+            let records = JSON.parse(localStorage.getItem('daily_records') || '[]');
+            const startDateStr = localStorage.getItem('start_date') || document.getElementById('start-date').value;
+            const totalBirds = parseFloat(localStorage.getItem('bird_count')) || 13000;
+            const flockName = localStorage.getItem('flock_name') || 'عنبر الدجاج البياض';
+            const birdBreed = localStorage.getItem('bird_breed') || '-';
+            
+            if (records.length === 0) {
+                alert('لا توجد بيانات لتصديرها!');
+                return;
+            }
+
+            const startDate = new Date(startDateStr);
+            let accumulatedDeaths = 0;
+            let processedRecords = records.map(r => {
+                const rDate = new Date(r.date);
+                const diffTime = rDate - startDate;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                const dayNum = diffDays > 0 ? diffDays : 1;
+                const weekNum = Math.floor((dayNum - 1) / 7) + 1;
+                const totalEggs = r.b1.eggs + r.b2.eggs + r.b3.eggs;
+                const totalDeaths = r.b1.deaths + r.b2.deaths + r.b3.deaths;
+                
+                accumulatedDeaths += totalDeaths;
+                const remainingBirds = Math.max(0, totalBirds - accumulatedDeaths);
+                
+                // Extract Year-Month for grouping e.g. "2026-03"
+                const yearMonth = r.date.substring(0, 7);
+
+                return { ...r, dayNum, weekNum, totalEggs, totalDeaths, accumulatedDeaths, remainingBirds, yearMonth };
+            });
+
+            // Group by Year-Month
+            let monthsGroups = {};
+            processedRecords.forEach(r => {
+                if (!monthsGroups[r.yearMonth]) {
+                    monthsGroups[r.yearMonth] = [];
+                }
+                monthsGroups[r.yearMonth].push(r);
+            });
+
+            // Create a new window for printing formatted as PDF pages
+            let printWindow = window.open('', '_blank');
+            let htmlContent = `<!DOCTYPE html>
+            <html lang="ar" dir="rtl">
+            <head>
+                <meta charset="UTF-8">
+                <title>تقرير الدورة الشهري - ${flockName}</title>
+                <style>
+                    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; margin: 0; padding: 10px; direction: rtl; }
+                    .month-page { page-break-after: always; padding: 20px; box-sizing: border-box; }
+                    .month-page:last-child { page-break-after: avoid; }
+                    h2 { text-align: center; color: #2e7d32; margin-bottom: 5px; }
+                    .info { text-align: center; margin-bottom: 15px; font-size: 0.9rem; color: #555; }
+                    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 10px; }
+                    th, td { padding: 6px; border: 1px solid #bbb; text-align: center; }
+                    th { background-color: #e8f5e9; color: #2e7d32; }
+                    @media print {
+                        body { -webkit-print-color-adjust: exact; }
+                        .month-page { page-break-after: always; height: 100vh; }
+                    }
+                </style>
+            </head>
+            <body>`;
+
+            // Arabic month names mapping
+            const monthNames = {
+                "01": "جانفي", "02": "فيففري", "03": "مارس", "04": "أفريل", 
+                "05": "ماي", "06": "جوان", "07": "جويلية", "08": "أوت", 
+                "09": "سبتمبر", "10": "أكتوبر", "11": "نوفمبر", "12": "ديسمبر"
+            };
+
+            for (let ym in monthsGroups) {
+                let parts = ym.split('-');
+                let year = parts[0];
+                let mNum = parts[1];
+                let monthTitle = (monthNames[mNum] || mNum) + ' ' + year;
+
+                htmlContent += `<div class="month-page">
+                    <h2>تقرير عنبر الدجاج البياض - شهر ${monthTitle}</h2>
+                    <div class="info">الدورة: ${flockName} | نوع الطيور: ${birdBreed} | العدد الإجمالي: ${totalBirds}</div>
+                    <table>
+                        <tr>
+                            <th>اليوم</th>
+                            <th>التاريخ</th>
+                            <th>الأسبوع</th>
+                            <th>ب 1 (أطباق/وفيات)</th>
+                            <th>ب 2 (أطباق/وفيات)</th>
+                            <th>ب 3 (أطباق/وفيات)</th>
+                            <th>إجمالي العنبر</th>
+                            <th>الطيور المتبقية</th>
+                            <th>أطباق ضائعة</th>
+                            <th>نسبة الإنتاج (%)</th>
+                        </tr>`;
+
+                let monthTotalEggs = 0;
+                let monthTotalDeaths = 0;
+                let lastRemaining = totalBirds;
+
+                monthsGroups[ym].forEach(r => {
+                    const prodRateDaily = r.remainingBirds > 0 ? ((r.totalEggs * 30) / r.remainingBirds * 100).toFixed(2) : 0;
+                    monthTotalEggs += r.totalEggs;
+                    monthTotalDeaths += r.totalDeaths;
+                    lastRemaining = r.remainingBirds;
+
+                    htmlContent += `<tr>
+                        <td>${r.dayNum}</td>
+                        <td>${r.date}</td>
+                        <td>${r.weekNum}</td>
+                        <td>${r.b1.eggs} / ${r.b1.deaths}</td>
+                        <td>${r.b2.eggs} / ${r.b2.deaths}</td>
+                        <td>${r.b3.eggs} / ${r.b3.deaths}</td>
+                        <td><b>${r.totalEggs}</b> / <b>${r.totalDeaths}</b></td>
+                        <td><b>${r.remainingBirds}</b></td>
+                        <td>${r.wasted || 0}</td>
+                        <td>${prodRateDaily}%</td>
+                    </tr>`;
+                });
+
+                const monthDaysCount = monthsGroups[ym].length;
+                const monthAvgRemaining = lastRemaining;
+                const monthProdRate = (monthDaysCount > 0 && monthAvgRemaining > 0) ? ((monthTotalEggs * 30) / (monthAvgRemaining * monthDaysCount) * 100).toFixed(2) : 0;
+
+                htmlContent += `<tr style="background-color: #f1f8e9; font-weight: bold;">
+                    <td colspan="6" style="text-align: left;">إجمالي الشهر:</td>
+                    <td><b>${monthTotalEggs}</b> / <b>${monthTotalDeaths}</b></td>
+                    <td><b>${lastRemaining}</b></td>
+                    <td>-</td>
+                    <td>نسبة الإنتاج الشهرية: <b>${monthProdRate}%</b></td>
+                </tr>`;
+
+                htmlContent += `</table></div>`;
+            }
+
+            htmlContent += `</body></html>`;
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
+            setTimeout(() => {
+                printWindow.print();
+            }, 500);
+        }
+
+
+        function exportToExcel() {
+            let records = JSON.parse(localStorage.getItem('daily_records') || '[]');
+            const startDateStr = localStorage.getItem('start_date') || document.getElementById('start-date').value;
+            const totalBirds = parseFloat(localStorage.getItem('bird_count')) || 13000;
+            const flockName = localStorage.getItem('flock_name') || 'عنبر الدجاج البياض';
+            const birdBreed = localStorage.getItem('bird_breed') || '-';
+            
+            if (records.length === 0) {
+                alert('لا توجد بيانات لتصديرها!');
+                return;
+            }
+
+            const startDate = new Date(startDateStr);
+            let excelData = [];
+
+            // Title and Info headers
+            excelData.push(["إدارة عنبر الدجاج البياض - تقرير الدورة الشامل"]);
+            excelData.push(["اسم الدورة:", flockName, "نوع الطيور:", birdBreed, "العدد الإجمالي:", totalBirds]);
+            excelData.push([]);
+
+            // Table Column Headers
+            excelData.push([
+                "اليوم", "تاريخ اليوم", "الأسبوع", 
+                "أطباق ب 1", "وفيات ب 1", 
+                "أطباق ب 2", "وفيات ب 2", 
+                "أطباق ب 3", "وفيات ب 3", 
+                "إجمالي أطباق", "إجمالي وفيات", 
+                "الطيور المتبقية", "أطباق مستهلكة / ضائعة", 
+                "نسبة الإنتاج اليومية (%)", 
+                "إجمالي أطباق الأسبوع", "نسبة الإنتاج الأسبوعية (%)"
+            ]);
+
+            let accumulatedDeaths = 0;
+            let processedRecords = records.map(r => {
+                const rDate = new Date(r.date);
+                const diffTime = rDate - startDate;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                const dayNum = diffDays > 0 ? diffDays : 1;
+                const weekNum = Math.floor((dayNum - 1) / 7) + 1;
+                const totalEggs = r.b1.eggs + r.b2.eggs + r.b3.eggs;
+                const totalDeaths = r.b1.deaths + r.b2.deaths + r.b3.deaths;
+                
+                accumulatedDeaths += totalDeaths;
+                const remainingBirds = Math.max(0, totalBirds - accumulatedDeaths);
+
+                return { ...r, dayNum, weekNum, totalEggs, totalDeaths, accumulatedDeaths, remainingBirds };
+            });
+
+            // Weekly data calculation
+            let weeklyData = {};
+            processedRecords.forEach(r => {
+                if (!weeklyData[r.weekNum]) {
+                    weeklyData[r.weekNum] = { eggs: 0, totalRemaining: 0, count: 0 };
+                }
+                weeklyData[r.weekNum].eggs += r.totalEggs;
+                weeklyData[r.weekNum].totalRemaining += r.remainingBirds;
+                weeklyData[r.weekNum].count += 1;
+            });
+
+            processedRecords.forEach(r => {
+                const prodRateDaily = r.remainingBirds > 0 ? ((r.totalEggs * 30) / r.remainingBirds * 100).toFixed(2) : 0;
+                const weeklyTotalEggs = weeklyData[r.weekNum] ? weeklyData[r.weekNum].eggs : 0;
+                const avgWeeklyRemaining = weeklyData[r.weekNum] ? (weeklyData[r.weekNum].totalRemaining / weeklyData[r.weekNum].count) : totalBirds;
+                const prodRateWeekly = avgWeeklyRemaining > 0 ? ((weeklyTotalEggs * 30) / (avgWeeklyRemaining * 7) * 100).toFixed(2) : 0;
+
+                excelData.push([
+                    r.dayNum,
+                    r.date,
+                    r.weekNum,
+                    r.b1.eggs,
+                    r.b1.deaths,
+                    r.b2.eggs,
+                    r.b2.deaths,
+                    r.b3.eggs,
+                    r.b3.deaths,
+                    r.totalEggs,
+                    r.totalDeaths,
+                    r.remainingBirds,
+                    r.wasted || 0,
+                    prodRateDaily + '%',
+                    weeklyTotalEggs,
+                    prodRateWeekly + '%'
+                ]);
+            });
+
+            // Grand totals summary row
+            let grandTotalEggs = 0;
+            let finalAccumulatedDeaths = 0;
+            processedRecords.forEach(r => {
+                grandTotalEggs += r.totalEggs;
+                finalAccumulatedDeaths = r.accumulatedDeaths;
+            });
+            const finalRemainingBirds = Math.max(0, totalBirds - finalAccumulatedDeaths);
+            const totalDaysCount = processedRecords.length;
+            const overallProdRate = (totalDaysCount > 0 && finalRemainingBirds > 0) ? ((grandTotalEggs * 30) / (finalRemainingBirds * totalDaysCount) * 100).toFixed(2) : 0;
+
+            excelData.push([]);
+            excelData.push([
+                "الإجمالي الكلي", "", "", "", "", "", "", "", "", 
+                grandTotalEggs, finalAccumulatedDeaths, finalRemainingBirds, "", 
+                "نسبة الإنتاج الكلية: " + overallProdRate + "%", "", ""
+            ]);
+
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "تقرير العنبر الشامل");
+            
+            XLSX.writeFile(wb, "Layer_Farm_Comprehensive_Report.xlsx");
+        }
+    </script>
+
+<script>
+// إعداد Firebase: استبدل القيم التالية ببيانات مشروعك من Firebase Console.
+const firebaseConfig = {
+  apiKey: "AIzaSyARIK2-bhKwGIP8QdXrU3iaysKjQ_T0p6U",
+  authDomain: "layerfarm-e545e.firebaseapp.com",
+  projectId: "layerfarm-e545e",
+  storageBucket: "layerfarm-e545e.firebasestorage.app",
+  messagingSenderId: "1043960341940",
+  appId: "1:1043960341940:web:b232cd655f02ae37d33ee1",
+  measurementId: "G-HN77EKJ0F8"
+};
+const cloudKeys = ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records'];
+let cloudUser = null, cloudDb = null, cloudEnabled = false, cloudHydrating = false, cloudSaveTimer = null;
+function cloudConfigured(){ return firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('YOUR_') && firebaseConfig.projectId && !firebaseConfig.projectId.startsWith('YOUR_'); }
+function cloudMsg(t){ const el=document.getElementById('cloudMessage'); if(el) el.textContent=t; }
+function cloudRequireLogin(message){ const overlay=document.getElementById('cloudLogin'); overlay.style.display='flex'; document.getElementById('cloudStatus').style.display='block'; document.getElementById('cloudStatus').textContent='🔒 يلزم تسجيل الدخول لاستخدام التطبيق'; if(message) cloudMsg(message); document.getElementById('cloudLogout').style.display='none'; }
+function cloudSignOut(){ if(firebase && firebase.auth) firebase.auth().signOut().catch(err=>cloudMsg(cloudError(err))); }
+async function cloudSignIn(){ const e=document.getElementById('cloudEmail').value.trim(), p=document.getElementById('cloudPassword').value; if(!e||!p){cloudMsg('أدخل البريد الإلكتروني وكلمة المرور.');return;} if(typeof firebase==='undefined' || !firebase.auth){cloudMsg('تعذر تحميل Firebase. افتح الملف مع اتصال بالإنترنت، وإذا استمرت المشكلة شغّل التطبيق من استضافة HTTPS.');return;} cloudMsg('جارٍ تسجيل الدخول...'); try { await Promise.race([firebase.auth().signInWithEmailAndPassword(e,p), new Promise((_,reject)=>setTimeout(()=>reject(new Error('انتهت مهلة الاتصال. تحقق من الإنترنت وافتح الملف من جديد.')),15000))]); } catch(err){ cloudMsg(cloudError(err)); } }
+function cloudSignUp(){ const e=document.getElementById('cloudEmail').value.trim(), p=document.getElementById('cloudPassword').value; if(!e||!p){cloudMsg('أدخل البريد الإلكتروني وكلمة المرور.');return;} if(p.length<6){cloudMsg('يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.');return;} cloudMsg('جارٍ إنشاء الحساب...'); firebase.auth().createUserWithEmailAndPassword(e,p).catch(err=>cloudMsg(cloudError(err))); }
+function cloudError(err){ const m={ 'auth/invalid-email':'البريد الإلكتروني غير صحيح.','auth/email-already-in-use':'هذا البريد مسجل مسبقاً. جرّب تسجيل الدخول.','auth/weak-password':'كلمة المرور ضعيفة؛ استخدم 6 أحرف على الأقل.','auth/invalid-credential':'بيانات الدخول غير صحيحة.','auth/network-request-failed':'تحقق من اتصال الإنترنت.','auth/operation-not-allowed':'فعّل طريقة الدخول بالبريد وكلمة المرور في Firebase.'}; return m[err.code] || ('تعذر إكمال العملية: '+err.message); }
+function cloudSaveSoon(){ if(!cloudEnabled || !cloudUser || cloudHydrating) return; clearTimeout(cloudSaveTimer); cloudSaveTimer=setTimeout(async()=>{ try { const data={}; cloudKeys.forEach(k=>{const v=localStorage.getItem(k); if(v!==null){try{data[k]=JSON.parse(v)}catch{data[k]=v}}}); data.updatedAt=firebase.firestore.FieldValue.serverTimestamp(); await cloudDb.collection('users').doc(cloudUser.uid).set(data,{merge:true}); const s=document.getElementById('cloudStatus'); s.textContent='☁️ تمت مزامنة البيانات سحابياً'; } catch(e){ const s=document.getElementById('cloudStatus'); s.textContent='⚠️ فشلت المزامنة السحابية: '+e.message; } },700); }
+// Keep the app's existing localStorage behavior, and sync saved changes when signed in.
+const originalSetItem=Storage.prototype.setItem;
+Storage.prototype.setItem=function(key,value){ originalSetItem.call(this,key,value); if(this===localStorage && cloudKeys.includes(key)) cloudSaveSoon(); };
+async function cloudAfterLogin(user){ cloudUser=user; cloudHydrating=true; try { const ref=cloudDb.collection('users').doc(user.uid); const snap=await ref.get(); if(snap.exists){ const data=snap.data(); cloudKeys.forEach(k=>{ if(Object.prototype.hasOwnProperty.call(data,k)){ const v=data[k]; originalSetItem.call(localStorage,k,typeof v==='string' && k!=='daily_records' ? v : JSON.stringify(v)); } else { localStorage.removeItem(k); } }); } else { // First login: upload this device's existing data to the new account.
+    const data={}; cloudKeys.forEach(k=>{const v=localStorage.getItem(k); if(v!==null){try{data[k]=JSON.parse(v)}catch{data[k]=v}}}); data.createdAt=firebase.firestore.FieldValue.serverTimestamp(); await ref.set(data,{merge:true});
+  } cloudEnabled=true; document.getElementById('cloudLogin').style.display='none'; document.getElementById('cloudStatus').style.display='block'; document.getElementById('cloudStatus').textContent='☁️ متصل بالسحابة: '+(user.email||'حسابك'); document.getElementById('cloudLogout').style.display='inline-block'; if(typeof window.onload==='function') window.onload(); } catch(e){ cloudEnabled=false; cloudMsg('تعذر تحميل البيانات من السحابة: '+e.message); document.getElementById('cloudLogin').style.display='flex'; } finally { cloudHydrating=false; } }
+window.addEventListener('load',()=>{
+  if(!cloudConfigured()){ cloudRequireLogin('⚠️ تسجيل الدخول غير متاح بعد: يجب إعداد بيانات Firebase داخل app/src/main/assets/index.html ثم إعادة بناء التطبيق.'); return; }
+  try { firebase.initializeApp(firebaseConfig); cloudDb=firebase.firestore(); document.getElementById('cloudLogin').style.display='flex'; document.getElementById('cloudStatus').style.display='block'; document.getElementById('cloudStatus').textContent='☁️ التخزين السحابي'; firebase.auth().onAuthStateChanged(user=>{ if(user) cloudAfterLogin(user); else { cloudUser=null; cloudEnabled=false; cloudRequireLogin('سجّل الدخول للمتابعة.'); } }); } catch(e){ cloudRequireLogin('خطأ في إعداد Firebase: '+e.message); }
+});
+</script>
+
+</body>
+</html>
