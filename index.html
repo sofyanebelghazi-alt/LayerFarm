@@ -6,9 +6,9 @@
     <title>إدارة عنبر الدجاج البياض</title>
     <style>
         :root {
-            --primary-color: #2e7d32;
-            --primary-light: #4caf50;
-            --bg-color: #f4f6f8;
+            --primary-color: #367a4b;
+            --primary-light: #5b9b6a;
+            --bg-color: #f3f5f3;
             --card-bg: #ffffff;
             --text-color: #333333;
             --border-color: #dddddd;
@@ -156,6 +156,24 @@
         .cloud-box input { margin-bottom:10px; }
         .cloud-secondary { background:#546e7a; }
         .cloud-message { margin-top:12px; font-size:.9rem; line-height:1.6; }
+        .card { border:1px solid #e7ebe7; }
+        input, select { background:#fff; min-height:44px; }
+        input[readonly], input:disabled { background:#f1f3f1; color:#6b726b; }
+        .danger-button { background:#c62828 !important; }
+        .danger-button:hover { background:#a71919 !important; }
+        .battery-card { background:#f9fbf9; border:1px solid #e3eae3; border-radius:9px; padding:12px; margin:12px 0; }
+        .battery-card h3 { margin:0 0 10px !important; color:var(--primary-color) !important; font-size:1rem !important; }
+        .button-row { display:flex; gap:8px; }
+        .button-row button { flex:1; }
+        .hint { color:#667066; font-size:.85rem; line-height:1.7; margin:8px 0; }
+        @media (max-width:480px) { .container { padding:0 10px; margin:10px auto; } .card { padding:13px; } .nav-item { font-size:.82rem; padding:14px 3px; } .row-inputs { gap:8px; } }
+        table th { background:var(--primary-color); color:#fff; }
+        table tr:nth-child(even) td { background:#fafcfa; }
+        .bottom-nav { padding-bottom:env(safe-area-inset-bottom); }
+        .cloud-choice { display:flex; gap:8px; margin:8px 0 12px; }
+        .cloud-choice button { flex:1; font-size:.9rem; padding:10px 5px; }
+        .cloud-choice .selected { outline:2px solid #a5c9ad; background:#1f6032; }
+
 
     </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -168,12 +186,12 @@
     <div id="cloudStatus" class="cloud-status" style="display:none">☁️ يلزم تسجيل الدخول لاستخدام التطبيق <button id="cloudLogout" class="cloud-secondary" style="display:none;margin-right:10px;padding:5px 10px" onclick="cloudSignOut()">تسجيل الخروج</button></div>
     <div id="cloudLogin" class="cloud-overlay" style="display:flex">
       <div class="cloud-box">
-        <h2>🔐 تسجيل الدخول مطلوب</h2>
-        <p>يجب تسجيل الدخول أو إنشاء حساب جديد للوصول إلى التطبيق وحفظ بياناتك سحابياً. لا يمكن المتابعة دون حساب.</p>
+        <h2>تسجيل الدخول إلى إدارة العنبر</h2>
+        <p>سجّل الدخول بحسابك للوصول إلى بيانات الدورة والسجلات اليومية وحفظها سحابياً.</p>
         <div class="form-group"><label for="cloudEmail">البريد الإلكتروني</label><input id="cloudEmail" type="email" autocomplete="username" placeholder="name@example.com"></div>
         <div class="form-group"><label for="cloudPassword">كلمة المرور (6 أحرف على الأقل)</label><input id="cloudPassword" type="password" autocomplete="current-password" placeholder="كلمة المرور"></div>
-        <button onclick="cloudSignIn()">تسجيل الدخول</button>
-        <button class="cloud-secondary" onclick="cloudSignUp()">إنشاء حساب جديد</button>
+        <button onclick="cloudSignIn()">تسجيل الدخول للإدارة</button>
+        <button class="cloud-secondary" onclick="cloudSignUp()">إنشاء حساب إداري جديد</button>
         <div id="cloudMessage" class="cloud-message"></div>
       </div>
     </div>
@@ -192,7 +210,7 @@
                     <input type="date" id="entry-date">
                 </div>
 
-                <h3 style="font-size: 1rem; margin: 15px 0 8px; color: #555;">البطارية 1</h3>
+                <div class="battery-card"><h3>البطارية 1</h3>
                 <div class="row-inputs">
                     <div class="form-group">
                         <label>عدد الأطباق</label>
@@ -204,7 +222,7 @@
                     </div>
                 </div>
 
-                <h3 style="font-size: 1rem; margin: 15px 0 8px; color: #555;">البطارية 2</h3>
+                </div><div class="battery-card"><h3>البطارية 2</h3>
                 <div class="row-inputs">
                     <div class="form-group">
                         <label>عدد الأطباق</label>
@@ -216,7 +234,7 @@
                     </div>
                 </div>
 
-                <h3 style="font-size: 1rem; margin: 15px 0 8px; color: #555;">البطارية 3</h3>
+                </div><div class="battery-card"><h3>البطارية 3</h3>
                 <div class="row-inputs">
                     <div class="form-group">
                         <label>عدد الأطباق</label>
@@ -229,13 +247,13 @@
                 </div>
 
                 
-                <h3 style="font-size: 1rem; margin: 15px 0 8px; color: #555;">الأطباق المستهلكة أو الضائعة</h3>
+                </div><div class="battery-card"><h3>الأطباق المستهلكة أو الضائعة</h3>
                 <div class="form-group">
                     <label>العدد</label>
                     <input type="number" id="wasted-eggs" min="0" value="0">
                 </div>
 
-                <button onclick="saveDailyData()">حفظ البيانات اليومية</button>
+                <p id="daily-edit-hint" class="hint" style="display:none">أنت تعدّل سجلًا موجودًا. الحفظ سيحدّث السجل نفسه.</p><div class="button-row"><button id="save-daily-button" onclick="saveDailyData()">حفظ البيانات اليومية</button><button id="cancel-edit-button" class="cloud-secondary" onclick="cancelEditRecord()" style="display:none">إلغاء التعديل</button></div>
             </div>
         </div>
 
@@ -269,7 +287,12 @@
                     <input type="number" id="start-age" value="126">
                 </div>
 
-                <button onclick="saveFlockInfo()">حفظ بيانات الدورة</button>
+                <button id="save-flock-button" onclick="saveFlockInfo()">حفظ بيانات الدورة</button><button id="delete-flock-button" class="danger-button" onclick="deleteFlockInfo()" style="display:none">حذف بيانات الدورة نهائياً</button><p id="flock-lock-hint" class="hint" style="display:none">بيانات الدورة محفوظة ومقفلة. لحذفها وبدء دورة جديدة، استخدم زر الحذف وأكّد كلمة مرور حسابك.</p>
+            </div>
+            <div class="card" id="viewer-management-card">
+                <h2>إدارة المعاينين</h2>
+                <p class="hint">إدارة حسابات المعاينة تحتاج إعداد صلاحيات Firebase وقاعدة بياناتها أولاً. لن يُفعّل إنشاء الحسابات من داخل التطبيق قبل ضبط القواعد الآمنة حتى لا يتمكن أي مستخدم من منح نفسه صلاحية المدير.</p>
+                <div id="viewer-management-status" class="hint">ميزة إدارة المعاينين غير مفعّلة بعد في إعدادات Firebase الحالية.</div>
             </div>
         </div>
 
@@ -296,6 +319,7 @@
     </div>
 
     <script>
+        let editingRecordDate = null;
         document.getElementById('entry-date').valueAsDate = new Date();
 
         // When date changes, load existing record for that date if any
@@ -330,9 +354,11 @@
             if(localStorage.getItem('bird_count')) document.getElementById('bird-count').value = localStorage.getItem('bird_count');
             if(localStorage.getItem('start_date')) document.getElementById('start-date').value = localStorage.getItem('start_date');
             if(localStorage.getItem('start_age')) document.getElementById('start-age').value = localStorage.getItem('start_age');
+            applyFlockLock(localStorage.getItem('flock_locked') === 'true');
         };
 
         function switchTab(tabId, element) {
+            if (tabId === 'daily' && localStorage.getItem('flock_locked') !== 'true') { alert('احفظ بيانات الدورة أولاً.'); return; }
             if (tabId === 'view') {
                 loadRecords();
             }
@@ -346,48 +372,125 @@
             element.classList.add('active');
         }
 
+        function applyFlockLock(locked) {
+            ['flock-name','bird-breed','bird-count','start-date','start-age'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.readOnly = !!locked; el.disabled = false; }
+            });
+            document.getElementById('save-flock-button').style.display = locked ? 'none' : 'block';
+            document.getElementById('delete-flock-button').style.display = locked ? 'block' : 'none';
+            document.getElementById('flock-lock-hint').style.display = locked ? 'block' : 'none';
+        }
+
         function saveFlockInfo() {
-            localStorage.setItem('flock_name', document.getElementById('flock-name').value);
-            localStorage.setItem('bird_breed', document.getElementById('bird-breed').value);
-            localStorage.setItem('bird_count', document.getElementById('bird-count').value);
-            localStorage.setItem('start_date', document.getElementById('start-date').value);
-            localStorage.setItem('start_age', document.getElementById('start-age').value);
-            alert('تم حفظ بيانات الدورة بنجاح!');
+            if (localStorage.getItem('flock_locked') === 'true') {
+                alert('بيانات الدورة مقفلة.'); return;
+            }
+            const name = document.getElementById('flock-name').value.trim();
+            const count = Number(document.getElementById('bird-count').value);
+            const date = document.getElementById('start-date').value;
+            if (!name || !date || !Number.isFinite(count) || count <= 0) {
+                alert('يرجى إدخال اسم الدورة وتاريخ البداية وعدد طيور صحيح.'); return;
+            }
+            localStorage.setItem('flock_name', name);
+            localStorage.setItem('bird_breed', document.getElementById('bird-breed').value.trim());
+            localStorage.setItem('bird_count', String(count));
+            localStorage.setItem('start_date', date);
+            localStorage.setItem('start_age', document.getElementById('start-age').value || '0');
+            localStorage.setItem('flock_locked', 'true');
+            applyFlockLock(true);
+            alert('تم حفظ بيانات الدورة وقفلها بنجاح.');
+        }
+
+        async function deleteFlockInfo() {
+            if (!cloudUser || !firebase || !firebase.auth) { alert('يجب تسجيل الدخول أولاً.'); return; }
+            const password = prompt('للتأكيد، أدخل كلمة مرور حسابك:');
+            if (password === null) return;
+            if (!password) { alert('لم تُدخل كلمة المرور.'); return; }
+            if (!confirm('تحذير: سيتم حذف بيانات الدورة وجميع السجلات اليومية المرتبطة بها نهائياً. هل تريد المتابعة؟')) return;
+            try {
+                const credential = firebase.auth.EmailAuthProvider.credential(cloudUser.email, password);
+                await cloudUser.reauthenticateWithCredential(credential);
+                if (cloudDb && cloudEnabled) {
+                    await cloudDb.collection('users').doc(cloudUser.uid).update({
+                        flock_name: firebase.firestore.FieldValue.delete(),
+                        bird_breed: firebase.firestore.FieldValue.delete(),
+                        bird_count: firebase.firestore.FieldValue.delete(),
+                        start_date: firebase.firestore.FieldValue.delete(),
+                        start_age: firebase.firestore.FieldValue.delete(),
+                        flock_locked: firebase.firestore.FieldValue.delete(),
+                        daily_records: firebase.firestore.FieldValue.delete()
+                    });
+                }
+                ['flock_name','bird_breed','bird_count','start_date','start_age','flock_locked','daily_records'].forEach(k => localStorage.removeItem(k));
+                document.getElementById('flock-name').value = '';
+                document.getElementById('bird-breed').value = '';
+                document.getElementById('bird-count').value = '13000';
+                document.getElementById('start-date').valueAsDate = new Date();
+                document.getElementById('start-age').value = '126';
+                document.getElementById('entry-date').valueAsDate = new Date();
+                ['b1-eggs','b1-deaths','b2-eggs','b2-deaths','b3-eggs','b3-deaths','wasted-eggs'].forEach(id => document.getElementById(id).value = '0');
+                cancelEditRecord(); applyFlockLock(false); loadRecords();
+                alert('تم حذف بيانات الدورة وسجلاتها. حسابك ما زال موجوداً ويمكنك بدء دورة جديدة.');
+            } catch (err) {
+                alert(err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential' ? 'كلمة المرور غير صحيحة.' : 'تعذر الحذف: ' + cloudError(err));
+            }
         }
 
         function saveDailyData() {
+            if (localStorage.getItem('flock_locked') !== 'true') {
+                alert('احفظ بيانات الدورة أولاً قبل التسجيل اليومي.'); return;
+            }
             const date = document.getElementById('entry-date').value;
+            if (!date) { alert('اختر تاريخ اليوم أولاً.'); return; }
             const data = {
-                date: date,
-                b1: { eggs: parseFloat(document.getElementById('b1-eggs').value) || 0, deaths: parseFloat(document.getElementById('b1-deaths').value) || 0 },
-                b2: { eggs: parseFloat(document.getElementById('b2-eggs').value) || 0, deaths: parseFloat(document.getElementById('b2-deaths').value) || 0 },
-                b3: { eggs: parseFloat(document.getElementById('b3-eggs').value) || 0, deaths: parseFloat(document.getElementById('b3-deaths').value) || 0 },
-                wasted: parseFloat(document.getElementById('wasted-eggs').value) || 0
+                date,
+                b1: { eggs: Math.max(0, parseFloat(document.getElementById('b1-eggs').value) || 0), deaths: Math.max(0, parseFloat(document.getElementById('b1-deaths').value) || 0) },
+                b2: { eggs: Math.max(0, parseFloat(document.getElementById('b2-eggs').value) || 0), deaths: Math.max(0, parseFloat(document.getElementById('b2-deaths').value) || 0) },
+                b3: { eggs: Math.max(0, parseFloat(document.getElementById('b3-eggs').value) || 0), deaths: Math.max(0, parseFloat(document.getElementById('b3-deaths').value) || 0) },
+                wasted: Math.max(0, parseFloat(document.getElementById('wasted-eggs').value) || 0)
             };
-            
             let records = JSON.parse(localStorage.getItem('daily_records') || '[]');
             const existingIndex = records.findIndex(r => r.date === date);
-            if (existingIndex >= 0) {
+            if (editingRecordDate) {
+                if (date !== editingRecordDate) { alert('لا يمكن تغيير تاريخ السجل أثناء التعديل. ألغِ التعديل ثم اختر السجل الصحيح.'); return; }
+                if (existingIndex < 0) { alert('السجل المطلوب تعديله غير موجود.'); cancelEditRecord(); return; }
                 records[existingIndex] = data;
+                alert('تم حفظ تعديلات يوم ' + date + ' بنجاح.');
+                cancelEditRecord();
             } else {
+                if (existingIndex >= 0) {
+                    alert('⚠️ هذا اليوم مسجّل مسبقاً! لا يمكن تسجيل التاريخ نفسه مرتين. إذا كنت تريد تصحيح البيانات، انتقل إلى السجل واختر «تعديل».');
+                    return;
+                }
                 records.push(data);
+                alert('تم تسجيل بيانات يوم ' + date + ' بنجاح!');
             }
             records.sort((a, b) => new Date(a.date) - new Date(b.date));
             localStorage.setItem('daily_records', JSON.stringify(records));
-            
-            alert('تم تسجيل بيانات يوم ' + date + ' بنجاح!');
         }
 
-        
         function editRecord(dateStr) {
+            if (localStorage.getItem('flock_locked') !== 'true') { alert('يجب حفظ بيانات الدورة أولاً.'); return; }
+            editingRecordDate = dateStr;
             document.getElementById('entry-date').value = dateStr;
-            // Trigger change event to load values
             document.getElementById('entry-date').dispatchEvent(new Event('change'));
-            // Switch to daily tab
-            switchTab('daily', document.querySelectorAll('.nav-item')[0]);
+            document.getElementById('save-daily-button').textContent = 'حفظ التعديلات';
+            document.getElementById('daily-edit-hint').style.display = 'block';
+            document.getElementById('cancel-edit-button').style.display = 'block';
+            switchTab('daily', document.querySelectorAll('.nav-item')[1]);
         }
 
-        
+        function cancelEditRecord() {
+            editingRecordDate = null;
+            const saveButton = document.getElementById('save-daily-button');
+            if (saveButton) saveButton.textContent = 'حفظ البيانات اليومية';
+            const hint = document.getElementById('daily-edit-hint');
+            if (hint) hint.style.display = 'none';
+            const cancel = document.getElementById('cancel-edit-button');
+            if (cancel) cancel.style.display = 'none';
+        }
+
         function loadRecords() {
             const listDiv = document.getElementById('records-list');
             let records = JSON.parse(localStorage.getItem('daily_records') || '[]');
@@ -765,7 +868,7 @@ const firebaseConfig = {
   appId: "1:1043960341940:web:b232cd655f02ae37d33ee1",
   measurementId: "G-HN77EKJ0F8"
 };
-const cloudKeys = ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records'];
+const cloudKeys = ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records','flock_locked'];
 let cloudUser = null, cloudDb = null, cloudEnabled = false, cloudHydrating = false, cloudSaveTimer = null;
 function cloudConfigured(){ return firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('YOUR_') && firebaseConfig.projectId && !firebaseConfig.projectId.startsWith('YOUR_'); }
 function cloudMsg(t){ const el=document.getElementById('cloudMessage'); if(el) el.textContent=t; }
