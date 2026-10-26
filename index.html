@@ -218,11 +218,11 @@ textarea {
                 <div class="row-inputs">
                     <div class="form-group">
                         <label>عدد الأطباق</label>
-                        <input type="number" id="b1-eggs" min="0" value="0">
+                        <input type="number" id="b1-eggs" min="0">
                     </div>
                     <div class="form-group">
                         <label>عدد الوفيات</label>
-                        <input type="number" id="b1-deaths" min="0" value="0">
+                        <input type="number" id="b1-deaths" min="0">
                     </div>
                 </div>
                 </div>
@@ -232,11 +232,11 @@ textarea {
                 <div class="row-inputs">
                     <div class="form-group">
                         <label>عدد الأطباق</label>
-                        <input type="number" id="b2-eggs" min="0" value="0">
+                        <input type="number" id="b2-eggs" min="0">
                     </div>
                     <div class="form-group">
                         <label>عدد الوفيات</label>
-                        <input type="number" id="b2-deaths" min="0" value="0">
+                        <input type="number" id="b2-deaths" min="0">
                     </div>
                 </div>
                 </div>
@@ -246,11 +246,11 @@ textarea {
                 <div class="row-inputs">
                     <div class="form-group">
                         <label>عدد الأطباق</label>
-                        <input type="number" id="b3-eggs" min="0" value="0">
+                        <input type="number" id="b3-eggs" min="0">
                     </div>
                     <div class="form-group">
                         <label>عدد الوفيات</label>
-                        <input type="number" id="b3-deaths" min="0" value="0">
+                        <input type="number" id="b3-deaths" min="0">
                     </div>
                 </div>
                 </div>
@@ -258,7 +258,7 @@ textarea {
                 <h3 style="font-size: 1rem; margin: 15px 0 8px; color: #555;">الأطباق المستهلكة أو الضائعة</h3>
                 <div class="form-group">
                     <label>العدد</label>
-                    <input type="number" id="wasted-eggs" min="0" value="0">
+                    <input type="number" id="wasted-eggs" min="0">
                 </div>
 
                 <div id="editingBanner" class="editing-banner">أنت تعدّل سجلًا محفوظًا. احفظ التعديلات أو ألغِها.</div>
@@ -342,13 +342,13 @@ textarea {
                 document.getElementById('b3-deaths').value = record.b3.deaths;
                 document.getElementById('wasted-eggs').value = record.wasted || 0;
             } else {
-                document.getElementById('b1-eggs').value = 0;
-                document.getElementById('b1-deaths').value = 0;
-                document.getElementById('b2-eggs').value = 0;
-                document.getElementById('b2-deaths').value = 0;
-                document.getElementById('b3-eggs').value = 0;
-                document.getElementById('b3-deaths').value = 0;
-                document.getElementById('wasted-eggs').value = 0;
+                document.getElementById('b1-eggs').value = '';
+                document.getElementById('b1-deaths').value = '';
+                document.getElementById('b2-eggs').value = '';
+                document.getElementById('b2-deaths').value = '';
+                document.getElementById('b3-eggs').value = '';
+                document.getElementById('b3-deaths').value = '';
+                document.getElementById('wasted-eggs').value = '';
             }
         });
 
