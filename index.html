@@ -157,6 +157,17 @@
         .cloud-secondary { background:#546e7a; }
         .cloud-message { margin-top:12px; font-size:.9rem; line-height:1.6; }
 
+
+        body { background:#f3f8f4; }
+        .card { border:1px solid #e2eee4; box-shadow:0 3px 12px rgba(31,86,46,.06); border-radius:12px; }
+        .battery-card { background:#f8fcf8; border:1px solid #dcebdd; border-radius:10px; padding:12px; margin:12px 0; }
+        .battery-card h3 { font-size:1rem; margin:0 0 10px; color:#2e7d32; }
+        .battery-card .row-inputs { gap:8px; }
+        .edit-actions { display:flex; gap:8px; }
+        .edit-actions button { flex:1; }
+        button.cancel-edit { background:#607d8b; }
+        .editing-banner { display:none; background:#fff8e1; border:1px solid #ffe082; color:#795548; border-radius:8px; padding:10px; margin:10px 0; }
+        @media (max-width:480px) { .container {padding:0 10px;} .card {padding:12px;} .row-inputs {gap:7px;} input,select {font-size:16px;} }
     </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -202,7 +213,8 @@ textarea {
                     <input type="date" id="entry-date">
                 </div>
 
-                <h3 style="font-size: 1rem; margin: 15px 0 8px; color: #555;">البطارية 1</h3>
+                <div class="battery-card">
+                <h3>البطارية 1</h3>
                 <div class="row-inputs">
                     <div class="form-group">
                         <label>عدد الأطباق</label>
@@ -213,8 +225,10 @@ textarea {
                         <input type="number" id="b1-deaths" min="0" value="0">
                     </div>
                 </div>
+                </div>
 
-                <h3 style="font-size: 1rem; margin: 15px 0 8px; color: #555;">البطارية 2</h3>
+                <div class="battery-card">
+                <h3>البطارية 2</h3>
                 <div class="row-inputs">
                     <div class="form-group">
                         <label>عدد الأطباق</label>
@@ -225,8 +239,10 @@ textarea {
                         <input type="number" id="b2-deaths" min="0" value="0">
                     </div>
                 </div>
+                </div>
 
-                <h3 style="font-size: 1rem; margin: 15px 0 8px; color: #555;">البطارية 3</h3>
+                <div class="battery-card">
+                <h3>البطارية 3</h3>
                 <div class="row-inputs">
                     <div class="form-group">
                         <label>عدد الأطباق</label>
@@ -237,15 +253,17 @@ textarea {
                         <input type="number" id="b3-deaths" min="0" value="0">
                     </div>
                 </div>
+                </div>
 
-                
                 <h3 style="font-size: 1rem; margin: 15px 0 8px; color: #555;">الأطباق المستهلكة أو الضائعة</h3>
                 <div class="form-group">
                     <label>العدد</label>
                     <input type="number" id="wasted-eggs" min="0" value="0">
                 </div>
 
-                <button onclick="saveDailyData()">حفظ البيانات اليومية</button>
+                <div id="editingBanner" class="editing-banner">أنت تعدّل سجلًا محفوظًا. احفظ التعديلات أو ألغِها.</div>
+                <button id="saveDailyButton" onclick="saveDailyData()">حفظ البيانات اليومية</button>
+                <button id="cancelEditButton" class="cancel-edit" onclick="cancelRecordEdit()" style="display:none">إلغاء التعديل</button>
             </div>
         </div>
 
@@ -342,7 +360,7 @@ textarea {
             if(localStorage.getItem('bird_count')) document.getElementById('bird-count').value = localStorage.getItem('bird_count');
             if(localStorage.getItem('start_date')) document.getElementById('start-date').value = localStorage.getItem('start_date');
             if(localStorage.getItem('start_age')) document.getElementById('start-age').value = localStorage.getItem('start_age');
-            setFlockLocked(!!localStorage.getItem('flock_name'));
+            setFlockLocked(localStorage.getItem('flock_locked') === 'true' || !!localStorage.getItem('flock_name'));
         };
 
         function switchTab(tabId, element) {
@@ -376,6 +394,7 @@ textarea {
             const name = document.getElementById('flock-name').value.trim();
             if (!name) { alert('أدخل اسم الدورة قبل الحفظ.'); return; }
             localStorage.setItem('flock_name', name);
+            localStorage.setItem('flock_locked', 'true');
             localStorage.setItem('bird_breed', document.getElementById('bird-breed').value);
             localStorage.setItem('bird_count', document.getElementById('bird-count').value);
             localStorage.setItem('start_date', document.getElementById('start-date').value);
@@ -397,10 +416,10 @@ textarea {
                 if (cloudDb && cloudUser && cloudUser.uid === user.uid) {
                     const del = firebase.firestore.FieldValue.delete();
                     const removal = {};
-                    ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records'].forEach(k => removal[k] = del);
+                    ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records','flock_locked'].forEach(k => removal[k] = del);
                     await cloudDb.collection('users').doc(user.uid).update(removal);
                 }
-                ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records'].forEach(k => localStorage.removeItem(k));
+                ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records','flock_locked'].forEach(k => localStorage.removeItem(k));
                 document.getElementById('flock-name').value = '';
                 document.getElementById('bird-breed').value = '';
                 document.getElementById('bird-count').value = '13000';
@@ -415,39 +434,77 @@ textarea {
             }
         }
 
+        let editingRecordDate = null;
+        let preEditRecord = null;
+
         function saveDailyData() {
             const date = document.getElementById('entry-date').value;
+            if (!date) { alert('يرجى اختيار التاريخ.'); return; }
             const data = {
                 date: date,
-                b1: { eggs: parseFloat(document.getElementById('b1-eggs').value) || 0, deaths: parseFloat(document.getElementById('b1-deaths').value) || 0 },
-                b2: { eggs: parseFloat(document.getElementById('b2-eggs').value) || 0, deaths: parseFloat(document.getElementById('b2-deaths').value) || 0 },
-                b3: { eggs: parseFloat(document.getElementById('b3-eggs').value) || 0, deaths: parseFloat(document.getElementById('b3-deaths').value) || 0 },
-                wasted: parseFloat(document.getElementById('wasted-eggs').value) || 0
+                b1: { eggs: Math.max(0, parseFloat(document.getElementById('b1-eggs').value) || 0), deaths: Math.max(0, parseFloat(document.getElementById('b1-deaths').value) || 0) },
+                b2: { eggs: Math.max(0, parseFloat(document.getElementById('b2-eggs').value) || 0), deaths: Math.max(0, parseFloat(document.getElementById('b2-deaths').value) || 0) },
+                b3: { eggs: Math.max(0, parseFloat(document.getElementById('b3-eggs').value) || 0), deaths: Math.max(0, parseFloat(document.getElementById('b3-deaths').value) || 0) },
+                wasted: Math.max(0, parseFloat(document.getElementById('wasted-eggs').value) || 0)
             };
-            
             let records = JSON.parse(localStorage.getItem('daily_records') || '[]');
             const existingIndex = records.findIndex(r => r.date === date);
-            if (existingIndex >= 0) {
-                records[existingIndex] = data;
+            if (editingRecordDate) {
+                if (date !== editingRecordDate && existingIndex >= 0) {
+                    alert('يوجد سجل محفوظ لهذا التاريخ بالفعل. اختر تاريخًا آخر أو ألغِ التعديل.'); return;
+                }
+                const oldIndex = records.findIndex(r => r.date === editingRecordDate);
+                if (oldIndex < 0) { alert('لم يعد السجل الأصلي موجودًا. ألغِ التعديل وحاول مجددًا.'); cancelRecordEdit(); return; }
+                records.splice(oldIndex, 1);
+                records.push(data);
             } else {
+                if (existingIndex >= 0) {
+                    alert('هذا التاريخ مسجّل مسبقًا. لتعديل بياناته، افتح «عرض البيانات» واضغط «تعديل».'); return;
+                }
                 records.push(data);
             }
             records.sort((a, b) => new Date(a.date) - new Date(b.date));
             localStorage.setItem('daily_records', JSON.stringify(records));
-            
-            alert('تم تسجيل بيانات يوم ' + date + ' بنجاح!');
+            const savedDate = date;
+            const wasEditing = !!editingRecordDate;
+            resetRecordEditState();
+            alert((wasEditing ? 'تم تعديل' : 'تم حفظ') + ' سجل يوم ' + savedDate + ' بنجاح!');
+            if (typeof loadRecords === 'function') loadRecords();
         }
 
-        
         function editRecord(dateStr) {
+            const records = JSON.parse(localStorage.getItem('daily_records') || '[]');
+            const record = records.find(r => r.date === dateStr);
+            if (!record) { alert('لم يتم العثور على السجل المطلوب.'); return; }
+            editingRecordDate = dateStr;
+            preEditRecord = JSON.parse(JSON.stringify(record));
             document.getElementById('entry-date').value = dateStr;
-            // Trigger change event to load values
             document.getElementById('entry-date').dispatchEvent(new Event('change'));
-            // Switch to daily tab
-            switchTab('daily', document.querySelectorAll('.nav-item')[0]);
+            document.getElementById('editingBanner').style.display = 'block';
+            document.getElementById('cancelEditButton').style.display = 'block';
+            document.getElementById('saveDailyButton').textContent = 'حفظ التعديلات';
+            switchTab('daily', document.querySelectorAll('.nav-item')[1]);
         }
 
-        
+        function cancelRecordEdit() {
+            if (editingRecordDate && preEditRecord) {
+                document.getElementById('entry-date').value = preEditRecord.date;
+                document.getElementById('entry-date').dispatchEvent(new Event('change'));
+            }
+            resetRecordEditState();
+        }
+
+        function resetRecordEditState() {
+            editingRecordDate = null;
+            preEditRecord = null;
+            const banner = document.getElementById('editingBanner');
+            const cancel = document.getElementById('cancelEditButton');
+            const save = document.getElementById('saveDailyButton');
+            if (banner) banner.style.display = 'none';
+            if (cancel) cancel.style.display = 'none';
+            if (save) save.textContent = 'حفظ البيانات اليومية';
+        }
+
         function loadRecords() {
             const listDiv = document.getElementById('records-list');
             let records = JSON.parse(localStorage.getItem('daily_records') || '[]');
@@ -821,7 +878,7 @@ const firebaseConfig = {
   appId: "1:1043960341940:web:b232cd655f02ae37d33ee1",
   measurementId: "G-HN77EKJ0F8"
 };
-const cloudKeys = ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records'];
+const cloudKeys = ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records','flock_locked'];
 let cloudUser = null, cloudDb = null, cloudEnabled = false, cloudHydrating = false, cloudSaveTimer = null;
 function cloudConfigured(){ return firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('YOUR_') && firebaseConfig.projectId && !firebaseConfig.projectId.startsWith('YOUR_'); }
 function cloudMsg(t){ const el=document.getElementById('cloudMessage'); if(el) el.textContent=t; }
