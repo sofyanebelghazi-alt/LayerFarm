@@ -279,7 +279,9 @@ textarea {
                     <input type="number" id="start-age" value="126">
                 </div>
 
-                <button onclick="saveFlockInfo()">حفظ بيانات الدورة</button>
+                <button id="saveFlockButton" onclick="saveFlockInfo()">حفظ بيانات الدورة</button>
+                <button id="deleteFlockButton" onclick="deleteFlockInfoPermanently()" style="display:none;background:#c62828;margin-top:10px;">حذف بيانات الدورة نهائيًا</button>
+                <p id="flockLockMessage" style="display:none;margin-top:10px;color:#555;font-size:.9rem;">بيانات الدورة محفوظة ومقفلة. لحذفها نهائيًا، اضغط زر الحذف وأدخل كلمة مرور حسابك.</p>
             </div>
         </div>
 
@@ -340,6 +342,7 @@ textarea {
             if(localStorage.getItem('bird_count')) document.getElementById('bird-count').value = localStorage.getItem('bird_count');
             if(localStorage.getItem('start_date')) document.getElementById('start-date').value = localStorage.getItem('start_date');
             if(localStorage.getItem('start_age')) document.getElementById('start-age').value = localStorage.getItem('start_age');
+            setFlockLocked(!!localStorage.getItem('flock_name'));
         };
 
         function switchTab(tabId, element) {
@@ -356,13 +359,60 @@ textarea {
             element.classList.add('active');
         }
 
+        function setFlockLocked(locked) {
+            ['flock-name','bird-breed','bird-count','start-date','start-age'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.disabled = locked;
+            });
+            const saveBtn = document.getElementById('saveFlockButton');
+            const deleteBtn = document.getElementById('deleteFlockButton');
+            const note = document.getElementById('flockLockMessage');
+            if (saveBtn) saveBtn.style.display = locked ? 'none' : 'block';
+            if (deleteBtn) deleteBtn.style.display = locked ? 'block' : 'none';
+            if (note) note.style.display = locked ? 'block' : 'none';
+        }
+
         function saveFlockInfo() {
-            localStorage.setItem('flock_name', document.getElementById('flock-name').value);
+            const name = document.getElementById('flock-name').value.trim();
+            if (!name) { alert('أدخل اسم الدورة قبل الحفظ.'); return; }
+            localStorage.setItem('flock_name', name);
             localStorage.setItem('bird_breed', document.getElementById('bird-breed').value);
             localStorage.setItem('bird_count', document.getElementById('bird-count').value);
             localStorage.setItem('start_date', document.getElementById('start-date').value);
             localStorage.setItem('start_age', document.getElementById('start-age').value);
-            alert('تم حفظ بيانات الدورة بنجاح!');
+            setFlockLocked(true);
+            alert('تم حفظ بيانات الدورة وقفلها بنجاح.');
+        }
+
+        async function deleteFlockInfoPermanently() {
+            if (!confirm('هل أنت متأكد من حذف بيانات الدورة والسجلات اليومية نهائيًا؟ لا يمكن التراجع عن هذه العملية.')) return;
+            const user = (typeof firebase !== 'undefined' && firebase.auth) ? firebase.auth().currentUser : null;
+            if (!user || !user.email) { alert('يجب تسجيل الدخول إلى الحساب أولًا لحذف بيانات الدورة.'); return; }
+            const password = prompt('أدخل كلمة مرور حسابك لتأكيد الحذف النهائي:');
+            if (password === null) return;
+            if (!password) { alert('يجب إدخال كلمة المرور.'); return; }
+            try {
+                const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
+                await user.reauthenticateWithCredential(credential);
+                if (cloudDb && cloudUser && cloudUser.uid === user.uid) {
+                    const del = firebase.firestore.FieldValue.delete();
+                    const removal = {};
+                    ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records'].forEach(k => removal[k] = del);
+                    await cloudDb.collection('users').doc(user.uid).update(removal);
+                }
+                ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records'].forEach(k => localStorage.removeItem(k));
+                document.getElementById('flock-name').value = '';
+                document.getElementById('bird-breed').value = '';
+                document.getElementById('bird-count').value = '13000';
+                document.getElementById('start-date').valueAsDate = new Date();
+                document.getElementById('start-age').value = '126';
+                setFlockLocked(false);
+                if (typeof loadRecords === 'function') loadRecords();
+                alert('تم حذف بيانات الدورة والسجلات اليومية نهائيًا. يمكنك إدخال دورة جديدة.');
+            } catch (err) {
+                if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') alert('كلمة المرور غير صحيحة. لم يتم حذف أي بيانات.');
+                else alert('تعذر حذف البيانات: ' + (err.message || 'خطأ غير معروف'));
+            }
         }
 
         function saveDailyData() {
@@ -448,7 +498,6 @@ textarea {
                     <th>ب 2 (أطباق/وفيات)</th>
                     <th>ب 3 (أطباق/وفيات)</th>
                     <th>إجمالي العنبر (أطباق/وفيات)</th>
-                    <th>الطيور المتبقية</th>
                     <th>أطباق مستهلكة / ضائعة</th>
                     <th>نسبة الإنتاج اليومية (%)</th>
                     <th>إجمالي أطباق الأسبوع</th>
@@ -471,7 +520,6 @@ textarea {
                     <td>${r.b2.eggs} / ${r.b2.deaths}</td>
                     <td>${r.b3.eggs} / ${r.b3.deaths}</td>
                     <td><b>${r.totalEggs}</b> / <b>${r.totalDeaths}</b></td>
-                    <td><b>${r.remainingBirds}</b></td>
                     <td>${r.wasted || 0}</td>
                     <td>${prodRateDaily}%</td>
                     <td><b>${weeklyTotalEggs}</b></td>
@@ -493,11 +541,9 @@ textarea {
             const overallProdRate = (totalDaysCount > 0 && finalRemainingBirds > 0) ? ((grandTotalEggs * 30) / (finalRemainingBirds * totalDaysCount) * 100).toFixed(2) : 0;
 
             html += `<tr style="background-color: #f1f8e9; font-weight: bold;">
-                <td colspan="6" style="text-align: left; padding: 10px;">الإجمالي الكلي / المتبقي:</td>
+                <td colspan="6" style="text-align: left; padding: 10px;">الإجمالي الكلي:</td>
                 <td><b>${grandTotalEggs}</b> / <b>${finalAccumulatedDeaths}</b></td>
-                <td><b>${finalRemainingBirds}</b></td>
-                <td>-</td>
-                <td>-</td>
+                <td colspan="2">الطيور المتبقية: <b>${finalRemainingBirds}</b></td>
                 <td>نسبة الإنتاج الكلية: <b>${overallProdRate}%</b></td>
                 <td colspan="2">-</td>
             </tr>`;
