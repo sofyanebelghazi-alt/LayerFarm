@@ -297,6 +297,15 @@ textarea {
                     <input type="number" id="start-age" value="126">
                 </div>
 
+                <hr style="margin:22px 0;border:0;border-top:1px solid #dcebdd;">
+                <section id="inspectorManagerPanel">
+                    <h3 style="color:#2e7d32">حساب المعاينة</h3>
+                    <p style="font-size:.9rem;color:#555">أنشئ حسابًا مستقلًا للمعاين ليشاهد البيانات ويصدّرها فقط، دون تعديلها أو حذفها.</p>
+                    <div class="form-group"><label for="inspectorEmail">بريد المعاين الإلكتروني</label><input id="inspectorEmail" type="email" placeholder="inspector@example.com" autocomplete="off"></div>
+                    <div class="form-group"><label for="inspectorPassword">كلمة مرور المعاين (6 أحرف على الأقل)</label><input id="inspectorPassword" type="password" minlength="6" placeholder="كلمة مرور مستقلة" autocomplete="new-password"></div>
+                    <button id="createInspectorButton" onclick="createInspectorAccount()" style="background:#1976d2">إنشاء حساب المعاين</button>
+                    <div id="inspectorMessage" class="cloud-message" role="status"></div>
+                </section>
                 <button id="saveFlockButton" onclick="saveFlockInfo()">حفظ بيانات الدورة</button>
                 <button id="deleteFlockButton" onclick="deleteFlockInfoPermanently()" style="display:none;background:#c62828;margin-top:10px;">حذف بيانات الدورة نهائيًا</button>
                 <p id="flockLockMessage" style="display:none;margin-top:10px;color:#555;font-size:.9rem;">بيانات الدورة محفوظة ومقفلة. لحذفها نهائيًا، اضغط زر الحذف وأدخل كلمة مرور حسابك.</p>
@@ -320,9 +329,9 @@ textarea {
 
     <!-- Bottom Navigation -->
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('flock', this)">بيانات الدورة</div>
-        <div class="nav-item" onclick="switchTab('daily', this)">التسجيل اليومي</div>
-        <div class="nav-item" onclick="switchTab('view', this)">عرض البيانات</div>
+        <div class="nav-item active" data-tab="flock" onclick="switchTab('flock', this)">بيانات الدورة</div>
+        <div class="nav-item" data-tab="daily" onclick="switchTab('daily', this)">التسجيل اليومي</div>
+        <div class="nav-item" data-tab="view" onclick="switchTab('view', this)">عرض البيانات</div>
     </div>
 
     <script>
@@ -364,6 +373,10 @@ textarea {
         };
 
         function switchTab(tabId, element) {
+            if (typeof inspectorMode !== 'undefined' && inspectorMode && tabId !== 'view') {
+                tabId = 'view';
+                element = document.querySelector('.nav-item[data-tab="view"]') || document.querySelectorAll('.nav-item')[2];
+            }
             if (tabId === 'view') {
                 loadRecords();
             }
@@ -391,6 +404,7 @@ textarea {
         }
 
         function saveFlockInfo() {
+            if (typeof inspectorMode !== 'undefined' && inspectorMode) { alert('حساب المعاينة للعرض فقط.'); return; }
             const name = document.getElementById('flock-name').value.trim();
             if (!name) { alert('أدخل اسم الدورة قبل الحفظ.'); return; }
             localStorage.setItem('flock_name', name);
@@ -404,6 +418,7 @@ textarea {
         }
 
         async function deleteFlockInfoPermanently() {
+            if (typeof inspectorMode !== 'undefined' && inspectorMode) { alert('لا يسمح لحساب المعاينة بحذف البيانات.'); return; }
             if (!confirm('هل أنت متأكد من حذف بيانات الدورة والسجلات اليومية نهائيًا؟ لا يمكن التراجع عن هذه العملية.')) return;
             const user = (typeof firebase !== 'undefined' && firebase.auth) ? firebase.auth().currentUser : null;
             if (!user || !user.email) { alert('يجب تسجيل الدخول إلى الحساب أولًا لحذف بيانات الدورة.'); return; }
@@ -438,6 +453,7 @@ textarea {
         let preEditRecord = null;
 
         function saveDailyData() {
+            if (typeof inspectorMode !== 'undefined' && inspectorMode) { alert('حساب المعاينة للعرض فقط.'); return; }
             const date = document.getElementById('entry-date').value;
             if (!date) { alert('يرجى اختيار التاريخ.'); return; }
             const data = {
@@ -473,6 +489,7 @@ textarea {
         }
 
         function editRecord(dateStr) {
+            if (typeof inspectorMode !== 'undefined' && inspectorMode) { alert('لا يسمح لحساب المعاينة بتعديل البيانات.'); return; }
             const records = JSON.parse(localStorage.getItem('daily_records') || '[]');
             const record = records.find(r => r.date === dateStr);
             if (!record) { alert('لم يتم العثور على السجل المطلوب.'); return; }
@@ -559,7 +576,7 @@ textarea {
                     <th>نسبة الإنتاج اليومية (%)</th>
                     <th>إجمالي أطباق الأسبوع</th>
                     <th>نسبة الإنتاج الأسبوعية (%)</th>
-                    <th>إجراء</th>
+                    ${typeof inspectorMode !== 'undefined' && inspectorMode ? '' : '<th>إجراء</th>'}
                 </tr>`;
             
             processedRecords.forEach(r => {
@@ -581,7 +598,7 @@ textarea {
                     <td>${prodRateDaily}%</td>
                     <td><b>${weeklyTotalEggs}</b></td>
                     <td><b>${prodRateWeekly}%</b></td>
-                    <td><button onclick="editRecord('${r.date}')" style="padding: 4px 8px; font-size: 0.75rem; margin-top: 0; background-color: #1976d2;">تعديل</button></td>
+                    ${typeof inspectorMode !== 'undefined' && inspectorMode ? '' : `<td><button onclick="editRecord('${r.date}')" style="padding: 4px 8px; font-size: 0.75rem; margin-top: 0; background-color: #1976d2;">تعديل</button></td>`}
                 </tr>`;
             });
 
@@ -868,6 +885,63 @@ textarea {
     </script>
 
 <script>
+// صلاحيات الواجهة: حساب المعاينة للقراءة والتصدير فقط.
+let inspectorMode = false;
+let inspectorManagerUid = null;
+let inspectorCreatorAuth = null;
+let inspectorLiveUnsubscribe = null;
+function inspectorMsg(message) { const el=document.getElementById('inspectorMessage'); if(el) el.textContent=message || ''; }
+function applyInspectorView() {
+  const panel=document.getElementById('inspectorManagerPanel');
+  if(panel) panel.style.display=inspectorMode ? 'none' : 'block';
+  const navItems=[...document.querySelectorAll('.nav-item')];
+  navItems.forEach(item=>{ const tab=item.getAttribute('data-tab'); item.style.display=(inspectorMode && tab!=='view')?'none':''; });
+  ['tab-flock','tab-daily'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display=inspectorMode?'none':''; });
+  const saveDaily=document.getElementById('saveDailyButton'); if(saveDaily) saveDaily.style.display=inspectorMode?'none':'';
+  const cancelEdit=document.getElementById('cancelEditButton'); if(cancelEdit) cancelEdit.style.display=inspectorMode?'none':cancelEdit.style.display;
+  const saveFlock=document.getElementById('saveFlockButton'); if(saveFlock && inspectorMode) saveFlock.style.display='none';
+  const delFlock=document.getElementById('deleteFlockButton'); if(delFlock && inspectorMode) delFlock.style.display='none';
+  const loginTitle=document.querySelector('#cloudLogin h2');
+  if(loginTitle) loginTitle.textContent='🔐 تسجيل الدخول مطلوب';
+}
+async function createInspectorAccount() {
+  if (inspectorMode) { inspectorMsg('حساب المعاينة لا يمكنه إنشاء حسابات أخرى.'); return; }
+  const email=(document.getElementById('inspectorEmail').value||'').trim().toLowerCase();
+  const password=document.getElementById('inspectorPassword').value||'';
+  if(!email || !password){ inspectorMsg('أدخل البريد الإلكتروني وكلمة المرور.'); return; }
+  if(password.length<6){ inspectorMsg('كلمة المرور يجب أن تكون 6 أحرف على الأقل.'); return; }
+  const manager=firebase.auth().currentUser;
+  if(!manager){ inspectorMsg('سجّل الدخول بحساب المدير أولًا.'); return; }
+  const button=document.getElementById('createInspectorButton'); button.disabled=true;
+  inspectorMsg('جارٍ إنشاء حساب المعاينة...');
+  let secondaryApp=null;
+  try {
+    // تطبيق Auth ثانوي حتى لا يتم إخراج المدير من حسابه عند إنشاء حساب المعاين.
+    secondaryApp=firebase.apps.find(a=>a.name==='InspectorAccountCreator') || firebase.initializeApp(firebaseConfig,'InspectorAccountCreator');
+    const secondaryAuth=secondaryApp.auth();
+    let credential;
+    try { credential=await secondaryAuth.createUserWithEmailAndPassword(email,password); }
+    catch(err) {
+      if(err.code==='auth/email-already-in-use') throw new Error('هذا البريد مستخدم مسبقًا. استعمل بريدًا آخر أو تحقّق من حساب المعاين الموجود.');
+      throw err;
+    }
+    const inspectorUid=credential.user.uid;
+    // تسجيل ارتباط حساب المعاين بحساب المدير الحالي.
+    await cloudDb.collection('inspectors').doc(inspectorUid).set({
+      email: email, managerUid: manager.uid, createdBy: manager.uid,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(), role: 'inspector', active: true
+    });
+    await secondaryAuth.signOut();
+    inspectorMsg('تم إنشاء حساب المعاينة وربطه بالدورة بنجاح. أعطِ المعاين البريد وكلمة المرور فقط.');
+    document.getElementById('inspectorPassword').value='';
+  } catch(err) {
+    inspectorMsg('تعذر إنشاء الحساب أو حفظ صلاحياته: '+(err.message||'خطأ غير معروف')+'. تحقّق من قواعد Firestore المطلوبة.');
+  } finally {
+    button.disabled=false;
+    if(secondaryApp) { try { await secondaryApp.auth().signOut(); } catch(_){} }
+  }
+}
+
 // إعداد Firebase: استبدل القيم التالية ببيانات مشروعك من Firebase Console.
 const firebaseConfig = {
   apiKey: "AIzaSyARIK2-bhKwGIP8QdXrU3iaysKjQ_T0p6U",
@@ -892,9 +966,46 @@ function cloudSaveSoon(){ if(!cloudEnabled || !cloudUser || cloudHydrating) retu
 // Keep the app's existing localStorage behavior, and sync saved changes when signed in.
 const originalSetItem=Storage.prototype.setItem;
 Storage.prototype.setItem=function(key,value){ originalSetItem.call(this,key,value); if(this===localStorage && cloudKeys.includes(key)) cloudSaveSoon(); };
-async function cloudAfterLogin(user){ cloudUser=user; cloudHydrating=true; try { const ref=cloudDb.collection('users').doc(user.uid); const snap=await ref.get(); if(snap.exists){ const data=snap.data(); cloudKeys.forEach(k=>{ if(Object.prototype.hasOwnProperty.call(data,k)){ const v=data[k]; originalSetItem.call(localStorage,k,typeof v==='string' && k!=='daily_records' ? v : JSON.stringify(v)); } else { localStorage.removeItem(k); } }); } else { // First login: upload this device's existing data to the new account.
-    const data={}; cloudKeys.forEach(k=>{const v=localStorage.getItem(k); if(v!==null){try{data[k]=JSON.parse(v)}catch{data[k]=v}}}); data.createdAt=firebase.firestore.FieldValue.serverTimestamp(); await ref.set(data,{merge:true});
-  } cloudEnabled=true; document.getElementById('cloudLogin').style.display='none'; document.getElementById('cloudStatus').style.display='block'; cloudStatusMsg('☁️ متصل بالسحابة: '+(user.email||'حسابك')); const logout=document.getElementById('cloudLogout'); if(logout) logout.style.display='inline-block'; if(typeof window.onload==='function') window.onload(); } catch(e){ cloudEnabled=false; cloudMsg('تعذر تحميل البيانات من السحابة: '+e.message); document.getElementById('cloudLogin').style.display='flex'; } finally { cloudHydrating=false; } }
+async function cloudAfterLogin(user){
+  cloudUser=user; cloudHydrating=true;
+  try {
+    // إذا كان الحساب معاينًا، اقرأ بيانات المدير ولا تزامن أي شيء إلى حساب المعاين.
+    const inspectorSnap=await cloudDb.collection('inspectors').doc(user.uid).get();
+    if(inspectorSnap.exists && inspectorSnap.data().role==='inspector' && inspectorSnap.data().active!==false){
+      inspectorMode=true; inspectorManagerUid=inspectorSnap.data().managerUid;
+      if(!inspectorManagerUid) throw new Error('حساب المعاينة غير مرتبط بحساب مدير.');
+      const managerSnap=await cloudDb.collection('users').doc(inspectorManagerUid).get();
+      if(!managerSnap.exists) throw new Error('لم يتم العثور على بيانات المدير في السحابة.');
+      const data=managerSnap.data();
+      cloudKeys.forEach(k=>{ if(Object.prototype.hasOwnProperty.call(data,k)){ const v=data[k]; originalSetItem.call(localStorage,k,typeof v==='string' && k!=='daily_records' ? v : JSON.stringify(v)); } else { localStorage.removeItem(k); } });
+      if(inspectorLiveUnsubscribe) inspectorLiveUnsubscribe();
+      inspectorLiveUnsubscribe=cloudDb.collection('users').doc(inspectorManagerUid).onSnapshot(snap=>{
+        if(!inspectorMode || !snap.exists) return;
+        const latest=snap.data();
+        cloudKeys.forEach(k=>{ if(Object.prototype.hasOwnProperty.call(latest,k)){ const v=latest[k]; originalSetItem.call(localStorage,k,typeof v==='string' && k!=='daily_records' ? v : JSON.stringify(v)); } else { localStorage.removeItem(k); } });
+        if(typeof loadRecords==='function') loadRecords();
+      }, err=>cloudStatusMsg('⚠️ تعذر تحديث بيانات المعاينة مباشرة: '+err.message));
+      cloudEnabled=false;
+      document.getElementById('cloudLogin').style.display='none';
+      document.getElementById('cloudStatus').style.display='block';
+      cloudStatusMsg('👁️ حساب معاينة للقراءة فقط: '+(user.email||''));
+      const logout=document.getElementById('cloudLogout'); if(logout) logout.style.display='inline-block';
+      if(typeof window.onload==='function') window.onload();
+      applyInspectorView();
+      switchTab('view', document.querySelector('.nav-item[data-tab="view"]'));
+      return;
+    }
+    inspectorMode=false; inspectorManagerUid=null; if(inspectorLiveUnsubscribe){inspectorLiveUnsubscribe(); inspectorLiveUnsubscribe=null;}
+    const ref=cloudDb.collection('users').doc(user.uid); const snap=await ref.get();
+    if(snap.exists){ const data=snap.data(); cloudKeys.forEach(k=>{ if(Object.prototype.hasOwnProperty.call(data,k)){ const v=data[k]; originalSetItem.call(localStorage,k,typeof v==='string' && k!=='daily_records' ? v : JSON.stringify(v)); } else { localStorage.removeItem(k); } }); }
+    else { const data={}; cloudKeys.forEach(k=>{const v=localStorage.getItem(k); if(v!==null){try{data[k]=JSON.parse(v)}catch{data[k]=v}}}); data.createdAt=firebase.firestore.FieldValue.serverTimestamp(); await ref.set(data,{merge:true}); }
+    cloudEnabled=true; document.getElementById('cloudLogin').style.display='none'; document.getElementById('cloudStatus').style.display='block'; cloudStatusMsg('☁️ متصل بالسحابة: '+(user.email||'حسابك'));
+    const logout=document.getElementById('cloudLogout'); if(logout) logout.style.display='inline-block';
+    if(typeof window.onload==='function') window.onload();
+    applyInspectorView();
+  } catch(e){ cloudEnabled=false; cloudMsg('تعذر تحميل البيانات من السحابة: '+e.message); document.getElementById('cloudLogin').style.display='flex'; }
+  finally { cloudHydrating=false; }
+}
 window.addEventListener('load',()=>{
   if(!cloudConfigured()){ cloudRequireLogin('⚠️ تسجيل الدخول غير متاح بعد: يجب إعداد بيانات Firebase داخل app/src/main/assets/index.html ثم إعادة بناء التطبيق.'); return; }
   try { firebase.initializeApp(firebaseConfig); cloudDb=firebase.firestore(); document.getElementById('cloudLogin').style.display='flex'; document.getElementById('cloudStatus').style.display='block'; cloudStatusMsg('☁️ التخزين السحابي'); firebase.auth().onAuthStateChanged(user=>{ if(user) cloudAfterLogin(user); else { cloudUser=null; cloudEnabled=false; cloudRequireLogin('سجّل الدخول للمتابعة.'); } }); } catch(e){ cloudRequireLogin('خطأ في إعداد Firebase: '+e.message); }
