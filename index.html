@@ -543,7 +543,7 @@ textarea {
                 const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
                 const dayNum = diffDays > 0 ? diffDays : 1;
                 const weekNum = Math.floor((dayNum - 1) / 7) + 1;
-                const totalEggs = r.b1.eggs + r.b2.eggs + r.b3.eggs;
+                const totalEggs = Math.max(0, r.b1.eggs + r.b2.eggs + r.b3.eggs - (parseFloat(r.wasted) || 0));
                 const totalDeaths = r.b1.deaths + r.b2.deaths + r.b3.deaths;
                 
                 accumulatedDeaths += totalDeaths;
@@ -563,20 +563,18 @@ textarea {
                 weeklyData[r.weekNum].count += 1;
             });
 
+            const isInspectorView = typeof inspectorMode !== 'undefined' && inspectorMode;
             let html = `<table>
                 <tr>
-                    <th>اليوم</th>
+                    ${isInspectorView ? '' : '<th>اليوم</th>'}
                     <th>التاريخ</th>
                     <th>الأسبوع</th>
                     <th>ب 1 (أطباق/وفيات)</th>
                     <th>ب 2 (أطباق/وفيات)</th>
                     <th>ب 3 (أطباق/وفيات)</th>
                     <th>إجمالي العنبر (أطباق/وفيات)</th>
-                    <th>أطباق مستهلكة / ضائعة</th>
-                    <th>نسبة الإنتاج اليومية (%)</th>
-                    <th>إجمالي أطباق الأسبوع</th>
-                    <th>نسبة الإنتاج الأسبوعية (%)</th>
-                    ${typeof inspectorMode !== 'undefined' && inspectorMode ? '' : '<th>إجراء</th>'}
+                    ${isInspectorView ? '' : '<th>أطباق مستهلكة / ضائعة</th><th>نسبة الإنتاج اليومية (%)</th><th>إجمالي أطباق الأسبوع</th><th>نسبة الإنتاج الأسبوعية (%)</th>'}
+                    ${isInspectorView ? '' : '<th>إجراء</th>'}
                 </tr>`;
             
             processedRecords.forEach(r => {
@@ -587,18 +585,15 @@ textarea {
                 const prodRateWeekly = avgWeeklyRemaining > 0 ? ((weeklyTotalEggs * 30) / (avgWeeklyRemaining * 7) * 100).toFixed(2) : 0;
 
                 html += `<tr>
-                    <td>${r.dayNum}</td>
+                    ${isInspectorView ? '' : `<td>${r.dayNum}</td>`}
                     <td>${r.date}</td>
                     <td>${r.weekNum}</td>
                     <td>${r.b1.eggs} / ${r.b1.deaths}</td>
                     <td>${r.b2.eggs} / ${r.b2.deaths}</td>
                     <td>${r.b3.eggs} / ${r.b3.deaths}</td>
                     <td><b>${r.totalEggs}</b> / <b>${r.totalDeaths}</b></td>
-                    <td>${r.wasted || 0}</td>
-                    <td>${prodRateDaily}%</td>
-                    <td><b>${weeklyTotalEggs}</b></td>
-                    <td><b>${prodRateWeekly}%</b></td>
-                    ${typeof inspectorMode !== 'undefined' && inspectorMode ? '' : `<td><button onclick="editRecord('${r.date}')" style="padding: 4px 8px; font-size: 0.75rem; margin-top: 0; background-color: #1976d2;">تعديل</button></td>`}
+                    ${isInspectorView ? '' : `<td>${r.wasted || 0}</td><td>${prodRateDaily}%</td><td><b>${weeklyTotalEggs}</b></td><td><b>${prodRateWeekly}%</b></td>`}
+                    ${isInspectorView ? '' : `<td><button onclick="editRecord('${r.date}')" style="padding: 4px 8px; font-size: 0.75rem; margin-top: 0; background-color: #1976d2;">تعديل</button></td>`}
                 </tr>`;
             });
 
@@ -615,11 +610,9 @@ textarea {
             const overallProdRate = (totalDaysCount > 0 && finalRemainingBirds > 0) ? ((grandTotalEggs * 30) / (finalRemainingBirds * totalDaysCount) * 100).toFixed(2) : 0;
 
             html += `<tr style="background-color: #f1f8e9; font-weight: bold;">
-                <td colspan="6" style="text-align: left; padding: 10px;">الإجمالي الكلي:</td>
+                ${isInspectorView ? `<td colspan="5" style="text-align:left;padding:10px;">الإجمالي الكلي — الطيور المتبقية: <b>${finalRemainingBirds}</b></td>` : '<td colspan="6" style="text-align: left; padding: 10px;">الإجمالي الكلي:</td>'}
                 <td><b>${grandTotalEggs}</b> / <b>${finalAccumulatedDeaths}</b></td>
-                <td colspan="2">الطيور المتبقية: <b>${finalRemainingBirds}</b></td>
-                <td>نسبة الإنتاج الكلية: <b>${overallProdRate}%</b></td>
-                <td colspan="2">-</td>
+                ${isInspectorView ? '' : `<td colspan="2">الطيور المتبقية: <b>${finalRemainingBirds}</b></td><td>نسبة الإنتاج الكلية: <b>${overallProdRate}%</b></td><td colspan="2">-</td>`}
             </tr>`;
 
             html += '</table>';
@@ -650,7 +643,7 @@ textarea {
                 const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
                 const dayNum = diffDays > 0 ? diffDays : 1;
                 const weekNum = Math.floor((dayNum - 1) / 7) + 1;
-                const totalEggs = r.b1.eggs + r.b2.eggs + r.b3.eggs;
+                const totalEggs = Math.max(0, r.b1.eggs + r.b2.eggs + r.b3.eggs - (parseFloat(r.wasted) || 0));
                 const totalDeaths = r.b1.deaths + r.b2.deaths + r.b3.deaths;
                 
                 accumulatedDeaths += totalDeaths;
@@ -713,7 +706,7 @@ textarea {
                     <div class="info">الدورة: ${flockName} | نوع الطيور: ${birdBreed} | العدد الإجمالي: ${totalBirds}</div>
                     <table>
                         <tr>
-                            <th>اليوم</th>
+                            ${inspectorMode ? '' : '<th>اليوم</th>'}
                             <th>التاريخ</th>
                             <th>الأسبوع</th>
                             <th>ب 1 (أطباق/وفيات)</th>
@@ -721,8 +714,7 @@ textarea {
                             <th>ب 3 (أطباق/وفيات)</th>
                             <th>إجمالي العنبر</th>
                             <th>الطيور المتبقية</th>
-                            <th>أطباق ضائعة</th>
-                            <th>نسبة الإنتاج (%)</th>
+                            ${inspectorMode ? '' : '<th>أطباق ضائعة</th><th>نسبة الإنتاج (%)</th>'}
                         </tr>`;
 
                 let monthTotalEggs = 0;
@@ -736,7 +728,7 @@ textarea {
                     lastRemaining = r.remainingBirds;
 
                     htmlContent += `<tr>
-                        <td>${r.dayNum}</td>
+                        ${inspectorMode ? '' : `<td>${r.dayNum}</td>`}
                         <td>${r.date}</td>
                         <td>${r.weekNum}</td>
                         <td>${r.b1.eggs} / ${r.b1.deaths}</td>
@@ -744,8 +736,7 @@ textarea {
                         <td>${r.b3.eggs} / ${r.b3.deaths}</td>
                         <td><b>${r.totalEggs}</b> / <b>${r.totalDeaths}</b></td>
                         <td><b>${r.remainingBirds}</b></td>
-                        <td>${r.wasted || 0}</td>
-                        <td>${prodRateDaily}%</td>
+                        ${inspectorMode ? '' : `<td>${r.wasted || 0}</td><td>${prodRateDaily}%</td>`}
                     </tr>`;
                 });
 
@@ -754,11 +745,10 @@ textarea {
                 const monthProdRate = (monthDaysCount > 0 && monthAvgRemaining > 0) ? ((monthTotalEggs * 30) / (monthAvgRemaining * monthDaysCount) * 100).toFixed(2) : 0;
 
                 htmlContent += `<tr style="background-color: #f1f8e9; font-weight: bold;">
-                    <td colspan="6" style="text-align: left;">إجمالي الشهر:</td>
+                    <td colspan="${inspectorMode ? 5 : 6}" style="text-align: left;">إجمالي الشهر:</td>
                     <td><b>${monthTotalEggs}</b> / <b>${monthTotalDeaths}</b></td>
                     <td><b>${lastRemaining}</b></td>
-                    <td>-</td>
-                    <td>نسبة الإنتاج الشهرية: <b>${monthProdRate}%</b></td>
+                    ${inspectorMode ? '' : `<td>-</td><td>نسبة الإنتاج الشهرية: <b>${monthProdRate}%</b></td>`}
                 </tr>`;
 
                 htmlContent += `</table></div>`;
@@ -794,14 +784,20 @@ textarea {
             excelData.push([]);
 
             // Table Column Headers
-            excelData.push([
-                "اليوم", "تاريخ اليوم", "الأسبوع", 
-                "أطباق ب 1", "وفيات ب 1", 
-                "أطباق ب 2", "وفيات ب 2", 
-                "أطباق ب 3", "وفيات ب 3", 
-                "إجمالي أطباق", "إجمالي وفيات", 
-                "الطيور المتبقية", "أطباق مستهلكة / ضائعة", 
-                "نسبة الإنتاج اليومية (%)", 
+            excelData.push(inspectorMode ? [
+                "تاريخ اليوم", "الأسبوع",
+                "أطباق ب 1", "وفيات ب 1",
+                "أطباق ب 2", "وفيات ب 2",
+                "أطباق ب 3", "وفيات ب 3",
+                "إجمالي أطباق", "إجمالي وفيات", "الطيور المتبقية"
+            ] : [
+                "اليوم", "تاريخ اليوم", "الأسبوع",
+                "أطباق ب 1", "وفيات ب 1",
+                "أطباق ب 2", "وفيات ب 2",
+                "أطباق ب 3", "وفيات ب 3",
+                "إجمالي أطباق", "إجمالي وفيات",
+                "الطيور المتبقية", "أطباق مستهلكة / ضائعة",
+                "نسبة الإنتاج اليومية (%)",
                 "إجمالي أطباق الأسبوع", "نسبة الإنتاج الأسبوعية (%)"
             ]);
 
@@ -812,7 +808,7 @@ textarea {
                 const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
                 const dayNum = diffDays > 0 ? diffDays : 1;
                 const weekNum = Math.floor((dayNum - 1) / 7) + 1;
-                const totalEggs = r.b1.eggs + r.b2.eggs + r.b3.eggs;
+                const totalEggs = Math.max(0, r.b1.eggs + r.b2.eggs + r.b3.eggs - (parseFloat(r.wasted) || 0));
                 const totalDeaths = r.b1.deaths + r.b2.deaths + r.b3.deaths;
                 
                 accumulatedDeaths += totalDeaths;
@@ -838,7 +834,19 @@ textarea {
                 const avgWeeklyRemaining = weeklyData[r.weekNum] ? (weeklyData[r.weekNum].totalRemaining / weeklyData[r.weekNum].count) : totalBirds;
                 const prodRateWeekly = avgWeeklyRemaining > 0 ? ((weeklyTotalEggs * 30) / (avgWeeklyRemaining * 7) * 100).toFixed(2) : 0;
 
-                excelData.push([
+                excelData.push(inspectorMode ? [
+                    r.date,
+                    r.weekNum,
+                    r.b1.eggs,
+                    r.b1.deaths,
+                    r.b2.eggs,
+                    r.b2.deaths,
+                    r.b3.eggs,
+                    r.b3.deaths,
+                    r.totalEggs,
+                    r.totalDeaths,
+                    r.remainingBirds
+                ] : [
                     r.dayNum,
                     r.date,
                     r.weekNum,
@@ -870,9 +878,11 @@ textarea {
             const overallProdRate = (totalDaysCount > 0 && finalRemainingBirds > 0) ? ((grandTotalEggs * 30) / (finalRemainingBirds * totalDaysCount) * 100).toFixed(2) : 0;
 
             excelData.push([]);
-            excelData.push([
-                "الإجمالي الكلي", "", "", "", "", "", "", "", "", 
-                grandTotalEggs, finalAccumulatedDeaths, finalRemainingBirds, "", 
+            excelData.push(inspectorMode ? [
+                "الإجمالي الكلي", "", "", "", "", "", "", "", grandTotalEggs, finalAccumulatedDeaths, finalRemainingBirds
+            ] : [
+                "الإجمالي الكلي", "", "", "", "", "", "", "", "",
+                grandTotalEggs, finalAccumulatedDeaths, finalRemainingBirds, "",
                 "نسبة الإنتاج الكلية: " + overallProdRate + "%", "", ""
             ]);
 
