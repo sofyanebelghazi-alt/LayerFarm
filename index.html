@@ -609,11 +609,13 @@ textarea {
             const totalDaysCount = processedRecords.length;
             const overallProdRate = (totalDaysCount > 0 && finalRemainingBirds > 0) ? ((grandTotalEggs * 30) / (finalRemainingBirds * totalDaysCount) * 100).toFixed(2) : 0;
 
-            html += `<tr style="background-color: #f1f8e9; font-weight: bold;">
-                ${isInspectorView ? `<td colspan="5" style="text-align:left;padding:10px;">الإجمالي الكلي — الطيور المتبقية: <b>${finalRemainingBirds}</b></td>` : '<td colspan="6" style="text-align: left; padding: 10px;">الإجمالي الكلي:</td>'}
-                <td><b>${grandTotalEggs}</b> / <b>${finalAccumulatedDeaths}</b></td>
-                ${isInspectorView ? '' : `<td colspan="2">الطيور المتبقية: <b>${finalRemainingBirds}</b></td><td>نسبة الإنتاج الكلية: <b>${overallProdRate}%</b></td><td colspan="2">-</td>`}
-            </tr>`;
+            if (!isInspectorView) {
+                html += `<tr style="background-color: #f1f8e9; font-weight: bold;">
+                    <td colspan="6" style="text-align: left; padding: 10px;">الإجمالي الكلي:</td>
+                    <td><b>${grandTotalEggs}</b> / <b>${finalAccumulatedDeaths}</b></td>
+                    <td colspan="2">الطيور المتبقية: <b>${finalRemainingBirds}</b></td><td>نسبة الإنتاج الكلية: <b>${overallProdRate}%</b></td><td colspan="2">-</td>
+                </tr>`;
+            }
 
             html += '</table>';
             listDiv.innerHTML = html;
@@ -878,13 +880,13 @@ textarea {
             const overallProdRate = (totalDaysCount > 0 && finalRemainingBirds > 0) ? ((grandTotalEggs * 30) / (finalRemainingBirds * totalDaysCount) * 100).toFixed(2) : 0;
 
             excelData.push([]);
-            excelData.push(inspectorMode ? [
-                "الإجمالي الكلي", "", "", "", "", "", "", "", grandTotalEggs, finalAccumulatedDeaths, finalRemainingBirds
-            ] : [
-                "الإجمالي الكلي", "", "", "", "", "", "", "", "",
-                grandTotalEggs, finalAccumulatedDeaths, finalRemainingBirds, "",
-                "نسبة الإنتاج الكلية: " + overallProdRate + "%", "", ""
-            ]);
+            if (!inspectorMode) {
+                excelData.push([
+                    "الإجمالي الكلي", "", "", "", "", "", "", "", "",
+                    grandTotalEggs, finalAccumulatedDeaths, finalRemainingBirds, "",
+                    "نسبة الإنتاج الكلية: " + overallProdRate + "%", "", ""
+                ]);
+            }
 
             const ws = XLSX.utils.aoa_to_sheet(excelData);
             const wb = XLSX.utils.book_new();
