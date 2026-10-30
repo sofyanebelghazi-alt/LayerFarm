@@ -168,22 +168,28 @@
         button.cancel-edit { background:#607d8b; }
         .editing-banner { display:none; background:#fff8e1; border:1px solid #ffe082; color:#795548; border-radius:8px; padding:10px; margin:10px 0; }
         @media (max-width:480px) { .container {padding:0 10px;} .card {padding:12px;} .row-inputs {gap:7px;} input,select {font-size:16px;} }
-        /* جدول عرض المعاين فقط: يتكيف مع عرض الهاتف دون تمرير أفقي */
-        #records-list.inspector-compact-wrap { overflow-x: hidden !important; width:100%; }
-        #records-list table.inspector-compact-table {
-            width:100% !important; min-width:0 !important; max-width:100%;
-            table-layout:fixed; font-size:clamp(8px, 2.35vw, 11px);
-        }
-        #records-list table.inspector-compact-table th,
-        #records-list table.inspector-compact-table td {
-            padding:3px 1px; white-space:normal; overflow-wrap:anywhere;
-            word-break:normal; line-height:1.35;
-        }
-        @media (max-width:480px) {
-            #records-list.inspector-compact-wrap { margin:0; }
-            #records-list table.inspector-compact-table th,
-            #records-list table.inspector-compact-table td { padding:2px 1px; font-size:8px; }
-        }
+
+        /* جدول عرض البيانات في حساب المعاين: ملاءمة عرض الهاتف دون تمرير أفقي */
+        #tab-view.inspector-view .card { padding:7px; }
+        #tab-view.inspector-view h2 { font-size:.92rem; margin-bottom:6px; }
+        #tab-view.inspector-view #records-list { overflow-x:hidden !important; width:100%; }
+        #tab-view.inspector-view table { width:100% !important; min-width:0 !important; table-layout:fixed; font-size:clamp(8px, 2.35vw, 10px); margin-top:5px; }
+        #tab-view.inspector-view th,
+        #tab-view.inspector-view td { padding:4px 1px; line-height:1.25; overflow-wrap:anywhere; word-break:break-word; }
+        #tab-view.inspector-view th { font-size:clamp(7px, 2.1vw, 9px); }
+        #tab-view.inspector-view th:nth-child(1),
+        #tab-view.inspector-view td:nth-child(1) { width:19%; }
+        #tab-view.inspector-view th:nth-child(2),
+        #tab-view.inspector-view td:nth-child(2) { width:10%; }
+        #tab-view.inspector-view th:nth-child(3),
+        #tab-view.inspector-view td:nth-child(3),
+        #tab-view.inspector-view th:nth-child(4),
+        #tab-view.inspector-view td:nth-child(4),
+        #tab-view.inspector-view th:nth-child(5),
+        #tab-view.inspector-view td:nth-child(5) { width:14%; }
+        #tab-view.inspector-view th:nth-child(6),
+        #tab-view.inspector-view td:nth-child(6) { width:29%; }
+        #tab-view.inspector-view button { font-size:.8rem; padding:7px; }
     </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -551,9 +557,9 @@ textarea {
 
             const startDate = new Date(startDateStr);
             
-            // Keep calculations chronological so accumulated deaths remain correct,
-            // regardless of the order in which records are displayed.
-            records.sort((a, b) => new Date(a.date) - new Date(b.date));
+            // Map records with calculated day and week and accumulated deaths
+            // احتساب الوفيات التراكمية حسب التاريخ من الأقدم إلى الأحدث، مهما كان ترتيب التخزين.
+            records = records.slice().sort((a, b) => a.date.localeCompare(b.date));
             let accumulatedDeaths = 0;
             let processedRecords = records.map(r => {
                 const rDate = new Date(r.date);
@@ -570,6 +576,9 @@ textarea {
                 return { ...r, dayNum, weekNum, totalEggs, totalDeaths, accumulatedDeaths, remainingBirds };
             });
 
+            // ترتيب العرض من أحدث تاريخ إلى أقدم تاريخ، بعد احتساب الوفيات تراكمياً بالترتيب الزمني.
+            processedRecords.sort((a, b) => b.date.localeCompare(a.date));
+
             // Calculate weekly totals and weekly average remaining birds
             let weeklyData = {};
             processedRecords.forEach(r => {
@@ -581,13 +590,8 @@ textarea {
                 weeklyData[r.weekNum].count += 1;
             });
 
-            // Display newest day first for both manager and inspector accounts.
-            processedRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
-
             const isInspectorView = typeof inspectorMode !== 'undefined' && inspectorMode;
-            const recordsContainer = document.getElementById('records-list');
-            if (recordsContainer) recordsContainer.classList.toggle('inspector-compact-wrap', isInspectorView);
-            let html = `<table class="${isInspectorView ? 'inspector-compact-table' : ''}">
+            let html = `<table>
                 <tr>
                     ${isInspectorView ? '' : '<th>اليوم</th>'}
                     <th>التاريخ</th>
@@ -660,9 +664,9 @@ textarea {
                 return;
             }
 
-            // Calculate cumulative deaths in chronological order, regardless of storage order.
-            records.sort((a, b) => new Date(a.date) - new Date(b.date));
             const startDate = new Date(startDateStr);
+            // احتساب الوفيات التراكمية حسب التاريخ من الأقدم إلى الأحدث، مهما كان ترتيب التخزين.
+            records = records.slice().sort((a, b) => a.date.localeCompare(b.date));
             let accumulatedDeaths = 0;
             let processedRecords = records.map(r => {
                 const rDate = new Date(r.date);
@@ -802,8 +806,6 @@ textarea {
                 return;
             }
 
-            // Calculate cumulative deaths in chronological order, regardless of storage order.
-            records.sort((a, b) => new Date(a.date) - new Date(b.date));
             const startDate = new Date(startDateStr);
             let excelData = [];
 
@@ -830,6 +832,8 @@ textarea {
                 "إجمالي أطباق الأسبوع", "نسبة الإنتاج الأسبوعية (%)"
             ]);
 
+            // احتساب الوفيات التراكمية حسب التاريخ من الأقدم إلى الأحدث، مهما كان ترتيب التخزين.
+            records = records.slice().sort((a, b) => a.date.localeCompare(b.date));
             let accumulatedDeaths = 0;
             let processedRecords = records.map(r => {
                 const rDate = new Date(r.date);
@@ -900,7 +904,7 @@ textarea {
             let finalAccumulatedDeaths = 0;
             processedRecords.forEach(r => {
                 grandTotalEggs += r.totalEggs;
-                finalAccumulatedDeaths = r.accumulatedDeaths;
+                finalAccumulatedDeaths = Math.max(finalAccumulatedDeaths, r.accumulatedDeaths);
             });
             const finalRemainingBirds = Math.max(0, totalBirds - finalAccumulatedDeaths);
             const totalDaysCount = processedRecords.length;
@@ -931,6 +935,8 @@ let inspectorCreatorAuth = null;
 let inspectorLiveUnsubscribe = null;
 function inspectorMsg(message) { const el=document.getElementById('inspectorMessage'); if(el) el.textContent=message || ''; }
 function applyInspectorView() {
+  const viewTab=document.getElementById('tab-view');
+  if(viewTab) viewTab.classList.toggle('inspector-view', !!inspectorMode);
   const panel=document.getElementById('inspectorManagerPanel');
   if(panel) panel.style.display=inspectorMode ? 'none' : 'block';
   const navItems=[...document.querySelectorAll('.nav-item')];
