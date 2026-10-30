@@ -168,6 +168,25 @@
         button.cancel-edit { background:#607d8b; }
         .editing-banner { display:none; background:#fff8e1; border:1px solid #ffe082; color:#795548; border-radius:8px; padding:10px; margin:10px 0; }
         @media (max-width:480px) { .container {padding:0 10px;} .card {padding:12px;} .row-inputs {gap:7px;} input,select {font-size:16px;} }
+
+        /* تنسيق مضغوط لواجهة بيانات الدورة */
+        .flock-card { overflow: visible; }
+        .flock-fields-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 14px; }
+        .flock-fields-grid .form-group { margin-bottom:10px; min-width:0; }
+        .flock-fields-grid label { font-size:.84rem; margin-bottom:4px; }
+        .flock-fields-grid input { padding:9px 8px; }
+        .inspector-open-button { background:#1976d2; }
+        .inspector-help { color:#555; font-size:.9rem; line-height:1.7; margin-bottom:16px; }
+        .inspector-back-button { background:#607d8b; }
+        @media (max-width:480px) {
+            .flock-card { padding:12px; }
+            .flock-fields-grid { gap:0 9px; }
+            .flock-fields-grid .form-group { margin-bottom:8px; }
+            .flock-fields-grid label { font-size:.78rem; }
+            .flock-fields-grid input { padding:8px 6px; font-size:15px; }
+            .flock-card h2 { margin-bottom:10px; }
+            .flock-card button { padding:10px; margin-top:8px; font-size:.92rem; }
+        }
     </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -269,46 +288,46 @@ textarea {
 
         <!-- Tab 2: Flock Info -->
         <div id="tab-flock" class="tab-content active">
-            <div class="card">
-                <h2>إعدادات ومعلومات الدورة</h2>
-                
-                <div class="form-group">
-                    <label for="flock-name">اسم الدورة</label>
-                    <input type="text" id="flock-name" placeholder="مثال: الدورة الأولى 2026">
+            <div class="card flock-card">
+                <div id="flockDetailsScreen">
+                    <h2>إعدادات ومعلومات الدورة</h2>
+                    <div class="flock-fields-grid">
+                        <div class="form-group">
+                            <label for="flock-name">اسم الدورة</label>
+                            <input type="text" id="flock-name" placeholder="مثال: الدورة الأولى 2026">
+                        </div>
+                        <div class="form-group">
+                            <label for="bird-breed">نوع الطيور</label>
+                            <input type="text" id="bird-breed" placeholder="مثال: هاي لاين / لومان">
+                        </div>
+                        <div class="form-group">
+                            <label for="bird-count">عدد الطيور الإجمالي</label>
+                            <input type="number" id="bird-count" value="13000">
+                        </div>
+                        <div class="form-group">
+                            <label for="start-date">تاريخ البداية</label>
+                            <input type="date" id="start-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="start-age">عمر الطيور عند البداية (بالأيام)</label>
+                            <input type="number" id="start-age" value="126">
+                        </div>
+                    </div>
+                    <button type="button" id="openInspectorScreenButton" class="inspector-open-button" onclick="showInspectorScreen()">إضافة حساب المعاين</button>
+                    <button id="saveFlockButton" onclick="saveFlockInfo()">حفظ بيانات الدورة</button>
+                    <button id="deleteFlockButton" onclick="deleteFlockInfoPermanently()" style="display:none;background:#c62828;margin-top:10px;">حذف بيانات الدورة نهائيًا</button>
+                    <p id="flockLockMessage" style="display:none;margin-top:10px;color:#555;font-size:.9rem;">بيانات الدورة محفوظة ومقفلة. لحذفها نهائيًا، اضغط زر الحذف وأدخل كلمة مرور حسابك.</p>
                 </div>
 
-                <div class="form-group">
-                    <label for="bird-breed">نوع الطيور</label>
-                    <input type="text" id="bird-breed" placeholder="مثال: هاي لاين / لومان">
-                </div>
-
-                <div class="form-group">
-                    <label for="bird-count">عدد الطيور الإجمالي</label>
-                    <input type="number" id="bird-count" value="13000">
-                </div>
-
-                <div class="form-group">
-                    <label for="start-date">تاريخ البداية</label>
-                    <input type="date" id="start-date">
-                </div>
-
-                <div class="form-group">
-                    <label for="start-age">عمر الطيور عند البداية (بالأيام)</label>
-                    <input type="number" id="start-age" value="126">
-                </div>
-
-                <hr style="margin:22px 0;border:0;border-top:1px solid #dcebdd;">
-                <section id="inspectorManagerPanel">
-                    <h3 style="color:#2e7d32">حساب المعاينة</h3>
-                    <p style="font-size:.9rem;color:#555">أنشئ حسابًا مستقلًا للمعاين ليشاهد البيانات ويصدّرها فقط، دون تعديلها أو حذفها.</p>
+                <section id="inspectorManagerPanel" class="inspector-screen" style="display:none">
+                    <h2>إضافة حساب المعاين</h2>
+                    <p class="inspector-help">أنشئ حسابًا مستقلًا للمعاين ليشاهد البيانات ويصدّرها فقط، دون تعديلها أو حذفها.</p>
                     <div class="form-group"><label for="inspectorEmail">بريد المعاين الإلكتروني</label><input id="inspectorEmail" type="email" placeholder="inspector@example.com" autocomplete="off"></div>
                     <div class="form-group"><label for="inspectorPassword">كلمة مرور المعاين (6 أحرف على الأقل)</label><input id="inspectorPassword" type="password" minlength="6" placeholder="كلمة مرور مستقلة" autocomplete="new-password"></div>
                     <button id="createInspectorButton" onclick="createInspectorAccount()" style="background:#1976d2">إنشاء حساب المعاين</button>
                     <div id="inspectorMessage" class="cloud-message" role="status"></div>
+                    <button type="button" class="inspector-back-button" onclick="hideInspectorScreen()">العودة إلى بيانات الدورة</button>
                 </section>
-                <button id="saveFlockButton" onclick="saveFlockInfo()">حفظ بيانات الدورة</button>
-                <button id="deleteFlockButton" onclick="deleteFlockInfoPermanently()" style="display:none;background:#c62828;margin-top:10px;">حذف بيانات الدورة نهائيًا</button>
-                <p id="flockLockMessage" style="display:none;margin-top:10px;color:#555;font-size:.9rem;">بيانات الدورة محفوظة ومقفلة. لحذفها نهائيًا، اضغط زر الحذف وأدخل كلمة مرور حسابك.</p>
             </div>
         </div>
 
@@ -388,6 +407,17 @@ textarea {
             });
             document.getElementById('tab-' + tabId).classList.add('active');
             element.classList.add('active');
+        }
+
+        function showInspectorScreen() {
+            document.getElementById('flockDetailsScreen').style.display = 'none';
+            document.getElementById('inspectorManagerPanel').style.display = 'block';
+            document.getElementById('inspectorEmail').focus();
+        }
+
+        function hideInspectorScreen() {
+            document.getElementById('inspectorManagerPanel').style.display = 'none';
+            document.getElementById('flockDetailsScreen').style.display = 'block';
         }
 
         function setFlockLocked(locked) {
