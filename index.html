@@ -625,7 +625,7 @@ textarea {
             let finalAccumulatedDeaths = 0;
             processedRecords.forEach(r => {
                 grandTotalEggs += r.totalEggs;
-                finalAccumulatedDeaths = r.accumulatedDeaths;
+                finalAccumulatedDeaths = Math.max(finalAccumulatedDeaths, r.accumulatedDeaths);
             });
             
             const finalRemainingBirds = Math.max(0, totalBirds - finalAccumulatedDeaths);
@@ -660,6 +660,8 @@ textarea {
                 return;
             }
 
+            // Calculate cumulative deaths in chronological order, regardless of storage order.
+            records.sort((a, b) => new Date(a.date) - new Date(b.date));
             const startDate = new Date(startDateStr);
             let accumulatedDeaths = 0;
             let processedRecords = records.map(r => {
@@ -715,7 +717,7 @@ textarea {
 
             // Arabic month names mapping
             const monthNames = {
-                "01": "جانفي", "02": "فيففري", "03": "مارس", "04": "أفريل", 
+                "01": "جانفي", "02": "فيفري", "03": "مارس", "04": "أفريل", 
                 "05": "ماي", "06": "جوان", "07": "جويلية", "08": "أوت", 
                 "09": "سبتمبر", "10": "أكتوبر", "11": "نوفمبر", "12": "ديسمبر"
             };
@@ -800,6 +802,8 @@ textarea {
                 return;
             }
 
+            // Calculate cumulative deaths in chronological order, regardless of storage order.
+            records.sort((a, b) => new Date(a.date) - new Date(b.date));
             const startDate = new Date(startDateStr);
             let excelData = [];
 
