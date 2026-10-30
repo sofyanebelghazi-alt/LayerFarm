@@ -168,53 +168,21 @@
         button.cancel-edit { background:#607d8b; }
         .editing-banner { display:none; background:#fff8e1; border:1px solid #ffe082; color:#795548; border-radius:8px; padding:10px; margin:10px 0; }
         @media (max-width:480px) { .container {padding:0 10px;} .card {padding:12px;} .row-inputs {gap:7px;} input,select {font-size:16px;} }
-
-        /* تنسيق مضغوط لواجهة بيانات الدورة */
-        .flock-card { overflow: visible; }
-        .flock-fields-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 14px; }
-        .flock-fields-grid .form-group { margin-bottom:10px; min-width:0; }
-        .flock-fields-grid label { font-size:.84rem; margin-bottom:4px; }
-        .flock-fields-grid input { padding:9px 8px; }
-        .inspector-open-button { background:#1976d2; }
-        .inspector-help { color:#555; font-size:.9rem; line-height:1.7; margin-bottom:16px; }
-        .inspector-back-button { background:#607d8b; }
+        /* جدول عرض المعاين فقط: يتكيف مع عرض الهاتف دون تمرير أفقي */
+        #records-list.inspector-compact-wrap { overflow-x: hidden !important; width:100%; }
+        #records-list table.inspector-compact-table {
+            width:100% !important; min-width:0 !important; max-width:100%;
+            table-layout:fixed; font-size:clamp(8px, 2.35vw, 11px);
+        }
+        #records-list table.inspector-compact-table th,
+        #records-list table.inspector-compact-table td {
+            padding:3px 1px; white-space:normal; overflow-wrap:anywhere;
+            word-break:normal; line-height:1.35;
+        }
         @media (max-width:480px) {
-            .flock-card { padding:12px; }
-            .flock-fields-grid { gap:0 9px; }
-            .flock-fields-grid .form-group { margin-bottom:8px; }
-            .flock-fields-grid label { font-size:.78rem; }
-            .flock-fields-grid input { padding:8px 6px; font-size:15px; }
-            .flock-card h2 { margin-bottom:10px; }
-            .flock-card button { padding:10px; margin-top:8px; font-size:.92rem; }
-        }
-
-        /* واجهة التسجيل اليومي المضغوطة لتقليل التمرير على الهاتف */
-        #tab-daily .card { padding:9px; margin-bottom:8px; overflow:visible; }
-        #tab-daily h2 { font-size:.98rem; margin-bottom:7px; padding-bottom:4px; }
-        #tab-daily > .card > .form-group { display:flex; align-items:center; gap:9px; margin-bottom:7px; }
-        #tab-daily > .card > .form-group label { flex:0 0 88px; margin:0; font-size:.78rem; }
-        #tab-daily > .card > .form-group input { flex:1; min-width:0; padding:6px 7px; font-size:15px; height:34px; }
-        #tab-daily .battery-card { display:grid; grid-template-columns:76px minmax(0,1fr) minmax(0,1fr); align-items:center; gap:7px; padding:7px; margin:6px 0; border-radius:5px; }
-        #tab-daily .battery-card h3 { font-size:.78rem; margin:0; white-space:nowrap; }
-        #tab-daily .battery-card .row-inputs { display:contents; }
-        #tab-daily .battery-card .form-group { min-width:0; margin:0; }
-        #tab-daily .battery-card label { font-size:.69rem; margin:0 0 3px; white-space:nowrap; }
-        #tab-daily .battery-card input { height:32px; padding:4px 5px; font-size:15px; }
-        #tab-daily > .card > h3 { font-size:.8rem !important; margin:7px 0 3px !important; }
-        #tab-daily #editingBanner { padding:6px; margin:6px 0; font-size:.78rem; }
-        #tab-daily button { padding:8px; margin-top:6px; font-size:.86rem; }
-        @media (max-width:380px) {
-          #tab-daily .card { padding:7px; }
-          #tab-daily .battery-card { grid-template-columns:65px minmax(0,1fr) minmax(0,1fr); gap:5px; padding:6px; }
-          #tab-daily .battery-card h3 { font-size:.72rem; }
-          #tab-daily .battery-card label { font-size:.64rem; }
-          #tab-daily .battery-card input { font-size:14px; }
-          #tab-daily > .card > .form-group label { flex-basis:78px; }
-        }
-        @media (max-height:650px) {
-          #tab-daily .battery-card { padding:5px; margin:4px 0; }
-          #tab-daily .battery-card input { height:28px; }
-          #tab-daily button { padding:6px; margin-top:4px; }
+            #records-list.inspector-compact-wrap { margin:0; }
+            #records-list table.inspector-compact-table th,
+            #records-list table.inspector-compact-table td { padding:2px 1px; font-size:8px; }
         }
     </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -317,46 +285,46 @@ textarea {
 
         <!-- Tab 2: Flock Info -->
         <div id="tab-flock" class="tab-content active">
-            <div class="card flock-card">
-                <div id="flockDetailsScreen">
-                    <h2>إعدادات ومعلومات الدورة</h2>
-                    <div class="flock-fields-grid">
-                        <div class="form-group">
-                            <label for="flock-name">اسم الدورة</label>
-                            <input type="text" id="flock-name" placeholder="مثال: الدورة الأولى 2026">
-                        </div>
-                        <div class="form-group">
-                            <label for="bird-breed">نوع الطيور</label>
-                            <input type="text" id="bird-breed" placeholder="مثال: هاي لاين / لومان">
-                        </div>
-                        <div class="form-group">
-                            <label for="bird-count">عدد الطيور الإجمالي</label>
-                            <input type="number" id="bird-count" value="13000">
-                        </div>
-                        <div class="form-group">
-                            <label for="start-date">تاريخ البداية</label>
-                            <input type="date" id="start-date">
-                        </div>
-                        <div class="form-group">
-                            <label for="start-age">عمر الطيور عند البداية (بالأيام)</label>
-                            <input type="number" id="start-age" value="126">
-                        </div>
-                    </div>
-                    <button type="button" id="openInspectorScreenButton" class="inspector-open-button" onclick="showInspectorScreen()">إضافة حساب المعاين</button>
-                    <button id="saveFlockButton" onclick="saveFlockInfo()">حفظ بيانات الدورة</button>
-                    <button id="deleteFlockButton" onclick="deleteFlockInfoPermanently()" style="display:none;background:#c62828;margin-top:10px;">حذف بيانات الدورة نهائيًا</button>
-                    <p id="flockLockMessage" style="display:none;margin-top:10px;color:#555;font-size:.9rem;">بيانات الدورة محفوظة ومقفلة. لحذفها نهائيًا، اضغط زر الحذف وأدخل كلمة مرور حسابك.</p>
+            <div class="card">
+                <h2>إعدادات ومعلومات الدورة</h2>
+                
+                <div class="form-group">
+                    <label for="flock-name">اسم الدورة</label>
+                    <input type="text" id="flock-name" placeholder="مثال: الدورة الأولى 2026">
                 </div>
 
-                <section id="inspectorManagerPanel" class="inspector-screen" style="display:none">
-                    <h2>إضافة حساب المعاين</h2>
-                    <p class="inspector-help">أنشئ حسابًا مستقلًا للمعاين ليشاهد البيانات ويصدّرها فقط، دون تعديلها أو حذفها.</p>
+                <div class="form-group">
+                    <label for="bird-breed">نوع الطيور</label>
+                    <input type="text" id="bird-breed" placeholder="مثال: هاي لاين / لومان">
+                </div>
+
+                <div class="form-group">
+                    <label for="bird-count">عدد الطيور الإجمالي</label>
+                    <input type="number" id="bird-count" value="13000">
+                </div>
+
+                <div class="form-group">
+                    <label for="start-date">تاريخ البداية</label>
+                    <input type="date" id="start-date">
+                </div>
+
+                <div class="form-group">
+                    <label for="start-age">عمر الطيور عند البداية (بالأيام)</label>
+                    <input type="number" id="start-age" value="126">
+                </div>
+
+                <hr style="margin:22px 0;border:0;border-top:1px solid #dcebdd;">
+                <section id="inspectorManagerPanel">
+                    <h3 style="color:#2e7d32">حساب المعاينة</h3>
+                    <p style="font-size:.9rem;color:#555">أنشئ حسابًا مستقلًا للمعاين ليشاهد البيانات ويصدّرها فقط، دون تعديلها أو حذفها.</p>
                     <div class="form-group"><label for="inspectorEmail">بريد المعاين الإلكتروني</label><input id="inspectorEmail" type="email" placeholder="inspector@example.com" autocomplete="off"></div>
                     <div class="form-group"><label for="inspectorPassword">كلمة مرور المعاين (6 أحرف على الأقل)</label><input id="inspectorPassword" type="password" minlength="6" placeholder="كلمة مرور مستقلة" autocomplete="new-password"></div>
                     <button id="createInspectorButton" onclick="createInspectorAccount()" style="background:#1976d2">إنشاء حساب المعاين</button>
                     <div id="inspectorMessage" class="cloud-message" role="status"></div>
-                    <button type="button" class="inspector-back-button" onclick="hideInspectorScreen()">العودة إلى بيانات الدورة</button>
                 </section>
+                <button id="saveFlockButton" onclick="saveFlockInfo()">حفظ بيانات الدورة</button>
+                <button id="deleteFlockButton" onclick="deleteFlockInfoPermanently()" style="display:none;background:#c62828;margin-top:10px;">حذف بيانات الدورة نهائيًا</button>
+                <p id="flockLockMessage" style="display:none;margin-top:10px;color:#555;font-size:.9rem;">بيانات الدورة محفوظة ومقفلة. لحذفها نهائيًا، اضغط زر الحذف وأدخل كلمة مرور حسابك.</p>
             </div>
         </div>
 
@@ -436,17 +404,6 @@ textarea {
             });
             document.getElementById('tab-' + tabId).classList.add('active');
             element.classList.add('active');
-        }
-
-        function showInspectorScreen() {
-            document.getElementById('flockDetailsScreen').style.display = 'none';
-            document.getElementById('inspectorManagerPanel').style.display = 'block';
-            document.getElementById('inspectorEmail').focus();
-        }
-
-        function hideInspectorScreen() {
-            document.getElementById('inspectorManagerPanel').style.display = 'none';
-            document.getElementById('flockDetailsScreen').style.display = 'block';
         }
 
         function setFlockLocked(locked) {
@@ -594,7 +551,9 @@ textarea {
 
             const startDate = new Date(startDateStr);
             
-            // Map records with calculated day and week and accumulated deaths
+            // Keep calculations chronological so accumulated deaths remain correct,
+            // regardless of the order in which records are displayed.
+            records.sort((a, b) => new Date(a.date) - new Date(b.date));
             let accumulatedDeaths = 0;
             let processedRecords = records.map(r => {
                 const rDate = new Date(r.date);
@@ -622,8 +581,13 @@ textarea {
                 weeklyData[r.weekNum].count += 1;
             });
 
+            // Display newest day first for both manager and inspector accounts.
+            processedRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+
             const isInspectorView = typeof inspectorMode !== 'undefined' && inspectorMode;
-            let html = `<table>
+            const recordsContainer = document.getElementById('records-list');
+            if (recordsContainer) recordsContainer.classList.toggle('inspector-compact-wrap', isInspectorView);
+            let html = `<table class="${isInspectorView ? 'inspector-compact-table' : ''}">
                 <tr>
                     ${isInspectorView ? '' : '<th>اليوم</th>'}
                     <th>التاريخ</th>
@@ -964,9 +928,7 @@ let inspectorLiveUnsubscribe = null;
 function inspectorMsg(message) { const el=document.getElementById('inspectorMessage'); if(el) el.textContent=message || ''; }
 function applyInspectorView() {
   const panel=document.getElementById('inspectorManagerPanel');
-  // تبقى واجهة إضافة المعاين مخفية افتراضياً، ولا تظهر إلا عبر زر الإضافة.
-  // في حساب المعاين نفسه تُخفى دائماً.
-  if(panel && inspectorMode) panel.style.display='none';
+  if(panel) panel.style.display=inspectorMode ? 'none' : 'block';
   const navItems=[...document.querySelectorAll('.nav-item')];
   navItems.forEach(item=>{ const tab=item.getAttribute('data-tab'); item.style.display=(inspectorMode && tab!=='view')?'none':''; });
   ['tab-flock','tab-daily'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display=inspectorMode?'none':''; });
