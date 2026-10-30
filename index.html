@@ -935,7 +935,9 @@ let inspectorLiveUnsubscribe = null;
 function inspectorMsg(message) { const el=document.getElementById('inspectorMessage'); if(el) el.textContent=message || ''; }
 function applyInspectorView() {
   const panel=document.getElementById('inspectorManagerPanel');
-  if(panel) panel.style.display=inspectorMode ? 'none' : 'block';
+  // تبقى واجهة إضافة المعاين مخفية افتراضياً، ولا تظهر إلا عبر زر الإضافة.
+  // في حساب المعاين نفسه تُخفى دائماً.
+  if(panel && inspectorMode) panel.style.display='none';
   const navItems=[...document.querySelectorAll('.nav-item')];
   navItems.forEach(item=>{ const tab=item.getAttribute('data-tab'); item.style.display=(inspectorMode && tab!=='view')?'none':''; });
   ['tab-flock','tab-daily'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display=inspectorMode?'none':''; });
