@@ -543,7 +543,20 @@ textarea {
                     ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records','flock_locked'].forEach(k => removal[k] = del);
                     await cloudDb.collection('users').doc(user.uid).update(removal);
                 }
-                ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records','flock_locked'].forEach(k => localStorage.removeItem(k));
+                // حذف محلي مقصود بعد نجاح الحذف السحابي: امنع مؤقتاً مشغل المزامنة
+                // حتى لا يعيد رفع البيانات المحذوفة إلى Firestore بعد انتهاء المهلة.
+                cloudHydrating = true;
+                try {
+                    ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records','flock_locked'].forEach(k => originalRemoveItem.call(localStorage, k));
+                } finally {
+                    cloudHydrating = false;
+                }
+                if (typeof activeCacheUid !== 'undefined' && activeCacheUid === user.uid) {
+                    writeAccountObject(ACCOUNT_CACHE_PREFIX, user.uid, {});
+                    writeAccountObject(ACCOUNT_BASE_PREFIX, user.uid, {});
+                    clearAccountPending(user.uid);
+                }
+                if (cloudSaveTimer) { clearTimeout(cloudSaveTimer); cloudSaveTimer = null; }
                 document.getElementById('flock-name').value = '';
                 document.getElementById('bird-breed').value = '';
                 document.getElementById('bird-count').value = '13000';
