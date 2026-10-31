@@ -216,6 +216,45 @@
           #tab-daily .battery-card input { height:28px; }
           #tab-daily button { padding:6px; margin-top:4px; }
         }
+
+        /* ضغط جدول عرض البيانات في حساب المعاين ليتناسب مع عرض الهاتف */
+        body.inspector-mode #tab-view .card { padding:7px; overflow:hidden; }
+        body.inspector-mode #tab-view h2 { font-size:.92rem; margin-bottom:7px; }
+        body.inspector-mode #records-list { width:100%; max-width:100%; overflow-x:hidden !important; }
+        body.inspector-mode #records-list table {
+            width:100% !important;
+            min-width:0 !important;
+            max-width:100%;
+            table-layout:fixed;
+            font-size:clamp(8px, 2.35vw, 10px);
+            margin-top:6px;
+        }
+        body.inspector-mode #records-list th,
+        body.inspector-mode #records-list td {
+            padding:3px 1px;
+            line-height:1.25;
+            white-space:normal;
+            overflow-wrap:anywhere;
+            word-break:normal;
+        }
+        body.inspector-mode #records-list th:nth-child(1),
+        body.inspector-mode #records-list td:nth-child(1) { width:17%; }
+        body.inspector-mode #records-list th:nth-child(2),
+        body.inspector-mode #records-list td:nth-child(2) { width:8%; }
+        body.inspector-mode #records-list th:nth-child(3),
+        body.inspector-mode #records-list td:nth-child(3),
+        body.inspector-mode #records-list th:nth-child(4),
+        body.inspector-mode #records-list td:nth-child(4),
+        body.inspector-mode #records-list th:nth-child(5),
+        body.inspector-mode #records-list td:nth-child(5) { width:13%; }
+        body.inspector-mode #records-list th:nth-child(6),
+        body.inspector-mode #records-list td:nth-child(6) { width:23%; }
+        body.inspector-mode #tab-view button { padding:8px 5px; font-size:.82rem; }
+        @media (max-width:380px) {
+            body.inspector-mode #records-list table { font-size:8px; }
+            body.inspector-mode #records-list th,
+            body.inspector-mode #records-list td { padding:2px 1px; }
+        }
     </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -963,6 +1002,7 @@ let inspectorCreatorAuth = null;
 let inspectorLiveUnsubscribe = null;
 function inspectorMsg(message) { const el=document.getElementById('inspectorMessage'); if(el) el.textContent=message || ''; }
 function applyInspectorView() {
+  document.body.classList.toggle('inspector-mode', !!inspectorMode);
   const panel=document.getElementById('inspectorManagerPanel');
   // تبقى واجهة إضافة المعاين مخفية افتراضياً، ولا تظهر إلا عبر زر الإضافة.
   // في حساب المعاين نفسه تُخفى دائماً.
