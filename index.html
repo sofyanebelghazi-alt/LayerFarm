@@ -27,12 +27,23 @@
         header {
             background-color: var(--primary-color);
             color: white;
-            padding: 15px;
-            text-align: center;
-            font-size: 1.2rem;
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 10px 12px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:8px;
+            font-size:1.05rem;
+            font-weight:bold;
+            box-shadow:0 2px 4px rgba(0,0,0,.1);
         }
+        header { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); }
+        .app-title { grid-column:2; text-align:center; white-space:nowrap; }
+        .header-logout { grid-column:1; justify-self:start; width:auto; margin:0; padding:7px 9px; border:1px solid #ffffff66; border-radius:5px; background:#ffffff1c; color:#fff; font-size:.75rem; line-height:1.35; white-space:nowrap; }
+        .header-logout:hover { background:#ffffff30; }
+        .sync-status-button { grid-column:3; justify-self:end; width:auto; min-width:112px; max-width:100%; margin:0; padding:7px 9px; border:1px solid #ffffff66; border-radius:5px; background:#ffffff1c; color:#fff; font-size:.75rem; line-height:1.35; white-space:normal; }
+        .sync-status-button:hover { background:#ffffff30; }
+        .sync-status-button:disabled { opacity:.75; }
+        @media(max-width:380px){ header{padding:8px 7px;gap:5px;font-size:.92rem}.sync-status-button{min-width:0;padding:6px 5px;font-size:.68rem}.header-logout{padding:6px 5px;font-size:.68rem}.app-title{font-size:.82rem} }
         .container {
             max-width: 850px;
             margin: 15px auto;
@@ -168,6 +179,93 @@
         button.cancel-edit { background:#607d8b; }
         .editing-banner { display:none; background:#fff8e1; border:1px solid #ffe082; color:#795548; border-radius:8px; padding:10px; margin:10px 0; }
         @media (max-width:480px) { .container {padding:0 10px;} .card {padding:12px;} .row-inputs {gap:7px;} input,select {font-size:16px;} }
+
+        /* تنسيق مضغوط لواجهة بيانات الدورة */
+        .flock-card { overflow: visible; }
+        .flock-fields-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 14px; }
+        .flock-fields-grid .form-group { margin-bottom:10px; min-width:0; }
+        .flock-fields-grid label { font-size:.84rem; margin-bottom:4px; }
+        .flock-fields-grid input { padding:9px 8px; }
+        .inspector-open-button { background:#1976d2; }
+        .inspector-help { color:#555; font-size:.9rem; line-height:1.7; margin-bottom:16px; }
+        .inspector-back-button { background:#607d8b; }
+        @media (max-width:480px) {
+            .flock-card { padding:12px; }
+            .flock-fields-grid { gap:0 9px; }
+            .flock-fields-grid .form-group { margin-bottom:8px; }
+            .flock-fields-grid label { font-size:.78rem; }
+            .flock-fields-grid input { padding:8px 6px; font-size:15px; }
+            .flock-card h2 { margin-bottom:10px; }
+            .flock-card button { padding:10px; margin-top:8px; font-size:.92rem; }
+        }
+
+        /* واجهة التسجيل اليومي المضغوطة لتقليل التمرير على الهاتف */
+        #tab-daily .card { padding:9px; margin-bottom:8px; overflow:visible; }
+        #tab-daily h2 { font-size:.98rem; margin-bottom:7px; padding-bottom:4px; }
+        #tab-daily > .card > .form-group { display:flex; align-items:center; gap:9px; margin-bottom:7px; }
+        #tab-daily > .card > .form-group label { flex:0 0 88px; margin:0; font-size:.78rem; }
+        #tab-daily > .card > .form-group input { flex:1; min-width:0; padding:6px 7px; font-size:15px; height:34px; }
+        #tab-daily .battery-card { display:grid; grid-template-columns:76px minmax(0,1fr) minmax(0,1fr); align-items:center; gap:7px; padding:7px; margin:6px 0; border-radius:5px; }
+        #tab-daily .battery-card h3 { font-size:.78rem; margin:0; white-space:nowrap; }
+        #tab-daily .battery-card .row-inputs { display:contents; }
+        #tab-daily .battery-card .form-group { min-width:0; margin:0; }
+        #tab-daily .battery-card label { font-size:.69rem; margin:0 0 3px; white-space:nowrap; }
+        #tab-daily .battery-card input { height:32px; padding:4px 5px; font-size:15px; }
+        #tab-daily > .card > h3 { font-size:.8rem !important; margin:7px 0 3px !important; }
+        #tab-daily #editingBanner { padding:6px; margin:6px 0; font-size:.78rem; }
+        #tab-daily button { padding:8px; margin-top:6px; font-size:.86rem; }
+        @media (max-width:380px) {
+          #tab-daily .card { padding:7px; }
+          #tab-daily .battery-card { grid-template-columns:65px minmax(0,1fr) minmax(0,1fr); gap:5px; padding:6px; }
+          #tab-daily .battery-card h3 { font-size:.72rem; }
+          #tab-daily .battery-card label { font-size:.64rem; }
+          #tab-daily .battery-card input { font-size:14px; }
+          #tab-daily > .card > .form-group label { flex-basis:78px; }
+        }
+        @media (max-height:650px) {
+          #tab-daily .battery-card { padding:5px; margin:4px 0; }
+          #tab-daily .battery-card input { height:28px; }
+          #tab-daily button { padding:6px; margin-top:4px; }
+        }
+
+        /* ضغط جدول عرض البيانات في حساب المعاين ليتناسب مع عرض الهاتف */
+        body.inspector-mode #tab-view .card { padding:7px; overflow:hidden; }
+        body.inspector-mode #tab-view h2 { font-size:.92rem; margin-bottom:7px; }
+        body.inspector-mode #records-list { width:100%; max-width:100%; overflow-x:hidden !important; }
+        body.inspector-mode #records-list table {
+            width:100% !important;
+            min-width:0 !important;
+            max-width:100%;
+            table-layout:fixed;
+            font-size:clamp(8px, 2.35vw, 10px);
+            margin-top:6px;
+        }
+        body.inspector-mode #records-list th,
+        body.inspector-mode #records-list td {
+            padding:3px 1px;
+            line-height:1.25;
+            white-space:normal;
+            overflow-wrap:anywhere;
+            word-break:normal;
+        }
+        body.inspector-mode #records-list th:nth-child(1),
+        body.inspector-mode #records-list td:nth-child(1) { width:17%; }
+        body.inspector-mode #records-list th:nth-child(2),
+        body.inspector-mode #records-list td:nth-child(2) { width:8%; }
+        body.inspector-mode #records-list th:nth-child(3),
+        body.inspector-mode #records-list td:nth-child(3),
+        body.inspector-mode #records-list th:nth-child(4),
+        body.inspector-mode #records-list td:nth-child(4),
+        body.inspector-mode #records-list th:nth-child(5),
+        body.inspector-mode #records-list td:nth-child(5) { width:13%; }
+        body.inspector-mode #records-list th:nth-child(6),
+        body.inspector-mode #records-list td:nth-child(6) { width:23%; }
+        body.inspector-mode #tab-view button { padding:8px 5px; font-size:.82rem; }
+        @media (max-width:380px) {
+            body.inspector-mode #records-list table { font-size:8px; }
+            body.inspector-mode #records-list th,
+            body.inspector-mode #records-list td { padding:2px 1px; }
+        }
     </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -186,7 +284,7 @@ textarea {
 </head>
 <body>
 
-    <div id="cloudStatus" class="cloud-status" style="display:none">☁️ يلزم تسجيل الدخول لاستخدام التطبيق <button id="cloudLogout" class="cloud-secondary" style="display:none;margin-right:10px;padding:5px 10px" onclick="cloudSignOut()">تسجيل الخروج</button></div>
+    <div id="cloudStatus" class="cloud-status" style="display:none">☁️ يلزم تسجيل الدخول لاستخدام التطبيق</div>
     <div id="cloudLogin" class="cloud-overlay" style="display:flex">
       <div class="cloud-box">
         <h2>🔐 تسجيل الدخول مطلوب</h2>
@@ -200,7 +298,11 @@ textarea {
     </div>
 
 
-    <header>إدارة عنبر الدجاج البياض</header>
+    <header>
+        <button id="cloudLogout" class="cloud-secondary header-logout" type="button" style="display:none" onclick="cloudSignOut()">تسجيل الخروج</button>
+        <div class="app-title">إدارة عنبر الدجاج البياض</div>
+        <button id="syncStatusButton" class="sync-status-button" type="button" onclick="manualCloudSync()" aria-live="polite">● غير متصل</button>
+    </header>
 
     <div class="container">
         
@@ -269,46 +371,46 @@ textarea {
 
         <!-- Tab 2: Flock Info -->
         <div id="tab-flock" class="tab-content active">
-            <div class="card">
-                <h2>إعدادات ومعلومات الدورة</h2>
-                
-                <div class="form-group">
-                    <label for="flock-name">اسم الدورة</label>
-                    <input type="text" id="flock-name" placeholder="مثال: الدورة الأولى 2026">
+            <div class="card flock-card">
+                <div id="flockDetailsScreen">
+                    <h2>إعدادات ومعلومات الدورة</h2>
+                    <div class="flock-fields-grid">
+                        <div class="form-group">
+                            <label for="flock-name">اسم الدورة</label>
+                            <input type="text" id="flock-name" placeholder="مثال: الدورة الأولى 2026">
+                        </div>
+                        <div class="form-group">
+                            <label for="bird-breed">نوع الطيور</label>
+                            <input type="text" id="bird-breed" placeholder="مثال: هاي لاين / لومان">
+                        </div>
+                        <div class="form-group">
+                            <label for="bird-count">عدد الطيور الإجمالي</label>
+                            <input type="number" id="bird-count" value="13000">
+                        </div>
+                        <div class="form-group">
+                            <label for="start-date">تاريخ البداية</label>
+                            <input type="date" id="start-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="start-age">عمر الطيور عند البداية (بالأيام)</label>
+                            <input type="number" id="start-age" value="126">
+                        </div>
+                    </div>
+                    <button type="button" id="openInspectorScreenButton" class="inspector-open-button" onclick="showInspectorScreen()">إضافة حساب المعاين</button>
+                    <button id="saveFlockButton" onclick="saveFlockInfo()">حفظ بيانات الدورة</button>
+                    <button id="deleteFlockButton" onclick="deleteFlockInfoPermanently()" style="display:none;background:#c62828;margin-top:10px;">حذف بيانات الدورة نهائيًا</button>
+                    <p id="flockLockMessage" style="display:none;margin-top:10px;color:#555;font-size:.9rem;">بيانات الدورة محفوظة ومقفلة. لحذفها نهائيًا، اضغط زر الحذف وأدخل كلمة مرور حسابك.</p>
                 </div>
 
-                <div class="form-group">
-                    <label for="bird-breed">نوع الطيور</label>
-                    <input type="text" id="bird-breed" placeholder="مثال: هاي لاين / لومان">
-                </div>
-
-                <div class="form-group">
-                    <label for="bird-count">عدد الطيور الإجمالي</label>
-                    <input type="number" id="bird-count" value="13000">
-                </div>
-
-                <div class="form-group">
-                    <label for="start-date">تاريخ البداية</label>
-                    <input type="date" id="start-date">
-                </div>
-
-                <div class="form-group">
-                    <label for="start-age">عمر الطيور عند البداية (بالأيام)</label>
-                    <input type="number" id="start-age" value="126">
-                </div>
-
-                <hr style="margin:22px 0;border:0;border-top:1px solid #dcebdd;">
-                <section id="inspectorManagerPanel">
-                    <h3 style="color:#2e7d32">حساب المعاينة</h3>
-                    <p style="font-size:.9rem;color:#555">أنشئ حسابًا مستقلًا للمعاين ليشاهد البيانات ويصدّرها فقط، دون تعديلها أو حذفها.</p>
+                <section id="inspectorManagerPanel" class="inspector-screen" style="display:none">
+                    <h2>إضافة حساب المعاين</h2>
+                    <p class="inspector-help">أنشئ حسابًا مستقلًا للمعاين ليشاهد البيانات ويصدّرها فقط، دون تعديلها أو حذفها.</p>
                     <div class="form-group"><label for="inspectorEmail">بريد المعاين الإلكتروني</label><input id="inspectorEmail" type="email" placeholder="inspector@example.com" autocomplete="off"></div>
                     <div class="form-group"><label for="inspectorPassword">كلمة مرور المعاين (6 أحرف على الأقل)</label><input id="inspectorPassword" type="password" minlength="6" placeholder="كلمة مرور مستقلة" autocomplete="new-password"></div>
                     <button id="createInspectorButton" onclick="createInspectorAccount()" style="background:#1976d2">إنشاء حساب المعاين</button>
                     <div id="inspectorMessage" class="cloud-message" role="status"></div>
+                    <button type="button" class="inspector-back-button" onclick="hideInspectorScreen()">العودة إلى بيانات الدورة</button>
                 </section>
-                <button id="saveFlockButton" onclick="saveFlockInfo()">حفظ بيانات الدورة</button>
-                <button id="deleteFlockButton" onclick="deleteFlockInfoPermanently()" style="display:none;background:#c62828;margin-top:10px;">حذف بيانات الدورة نهائيًا</button>
-                <p id="flockLockMessage" style="display:none;margin-top:10px;color:#555;font-size:.9rem;">بيانات الدورة محفوظة ومقفلة. لحذفها نهائيًا، اضغط زر الحذف وأدخل كلمة مرور حسابك.</p>
             </div>
         </div>
 
@@ -390,6 +492,17 @@ textarea {
             element.classList.add('active');
         }
 
+        function showInspectorScreen() {
+            document.getElementById('flockDetailsScreen').style.display = 'none';
+            document.getElementById('inspectorManagerPanel').style.display = 'block';
+            document.getElementById('inspectorEmail').focus();
+        }
+
+        function hideInspectorScreen() {
+            document.getElementById('inspectorManagerPanel').style.display = 'none';
+            document.getElementById('flockDetailsScreen').style.display = 'block';
+        }
+
         function setFlockLocked(locked) {
             ['flock-name','bird-breed','bird-count','start-date','start-age'].forEach(id => {
                 const el = document.getElementById(id);
@@ -434,7 +547,20 @@ textarea {
                     ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records','flock_locked'].forEach(k => removal[k] = del);
                     await cloudDb.collection('users').doc(user.uid).update(removal);
                 }
-                ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records','flock_locked'].forEach(k => localStorage.removeItem(k));
+                // حذف محلي مقصود بعد نجاح الحذف السحابي: امنع مؤقتاً مشغل المزامنة
+                // حتى لا يعيد رفع البيانات المحذوفة إلى Firestore بعد انتهاء المهلة.
+                cloudHydrating = true;
+                try {
+                    ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records','flock_locked'].forEach(k => originalRemoveItem.call(localStorage, k));
+                } finally {
+                    cloudHydrating = false;
+                }
+                if (typeof activeCacheUid !== 'undefined' && activeCacheUid === user.uid) {
+                    writeAccountObject(ACCOUNT_CACHE_PREFIX, user.uid, {});
+                    writeAccountObject(ACCOUNT_BASE_PREFIX, user.uid, {});
+                    clearAccountPending(user.uid);
+                }
+                if (cloudSaveTimer) { clearTimeout(cloudSaveTimer); cloudSaveTimer = null; }
                 document.getElementById('flock-name').value = '';
                 document.getElementById('bird-breed').value = '';
                 document.getElementById('bird-count').value = '13000';
@@ -522,6 +648,53 @@ textarea {
             if (save) save.textContent = 'حفظ البيانات اليومية';
         }
 
+        // محرك موحد للحسابات: يحسب الوفيات تراكمياً زمنياً ثم يجهز المجاميع.
+        function calculateFarmRecords(rawRecords, startDateStr, configuredBirds) {
+            const toNumber = value => {
+                const n = Number(value);
+                return Number.isFinite(n) && n > 0 ? n : 0;
+            };
+            const dateOrdinal = value => {
+                const parts = String(value || '').split('-').map(Number);
+                if (parts.length !== 3 || parts.some(n => !Number.isFinite(n))) return NaN;
+                return Math.floor(Date.UTC(parts[0], parts[1] - 1, parts[2]) / 86400000);
+            };
+            const startOrdinal = dateOrdinal(startDateStr);
+            const totalBirds = toNumber(configuredBirds) || 13000;
+            let accumulatedDeaths = 0;
+            const chronological = [...(Array.isArray(rawRecords) ? rawRecords : [])]
+                .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
+            const processedRecords = chronological.map(r => {
+                const b1 = { eggs: toNumber(r.b1 && r.b1.eggs), deaths: toNumber(r.b1 && r.b1.deaths) };
+                const b2 = { eggs: toNumber(r.b2 && r.b2.eggs), deaths: toNumber(r.b2 && r.b2.deaths) };
+                const b3 = { eggs: toNumber(r.b3 && r.b3.eggs), deaths: toNumber(r.b3 && r.b3.deaths) };
+                const ordinal = dateOrdinal(r.date);
+                const diffDays = Number.isFinite(ordinal) && Number.isFinite(startOrdinal) ? ordinal - startOrdinal + 1 : 1;
+                const dayNum = Math.max(1, diffDays);
+                const weekNum = Math.floor((dayNum - 1) / 7) + 1;
+                const wasted = toNumber(r.wasted);
+                const totalEggs = Math.max(0, b1.eggs + b2.eggs + b3.eggs - wasted);
+                const totalDeaths = b1.deaths + b2.deaths + b3.deaths;
+                accumulatedDeaths += totalDeaths;
+                const remainingBirds = Math.max(0, totalBirds - accumulatedDeaths);
+                return { ...r, b1, b2, b3, wasted, dayNum, weekNum, totalEggs, totalDeaths, accumulatedDeaths, remainingBirds, yearMonth: String(r.date || '').substring(0, 7) };
+            });
+            const weeklyData = {};
+            processedRecords.forEach(r => {
+                if (!weeklyData[r.weekNum]) weeklyData[r.weekNum] = { eggs: 0, birdDays: 0, deaths: 0, count: 0 };
+                weeklyData[r.weekNum].eggs += r.totalEggs;
+                weeklyData[r.weekNum].birdDays += r.remainingBirds;
+                weeklyData[r.weekNum].deaths += r.totalDeaths;
+                weeklyData[r.weekNum].count += 1;
+            });
+            const grandTotalEggs = processedRecords.reduce((sum, r) => sum + r.totalEggs, 0);
+            const grandTotalDeaths = processedRecords.reduce((sum, r) => sum + r.totalDeaths, 0);
+            const birdDays = processedRecords.reduce((sum, r) => sum + r.remainingBirds, 0);
+            const finalRemainingBirds = processedRecords.length ? processedRecords[processedRecords.length - 1].remainingBirds : totalBirds;
+            const rate = (eggs, birdsDays) => birdsDays > 0 ? (eggs * 30 / birdsDays * 100) : 0;
+            return { processedRecords, weeklyData, totalBirds, grandTotalEggs, grandTotalDeaths, birdDays, finalRemainingBirds, overallProdRate: rate(grandTotalEggs, birdDays), rate };
+        }
+
         function loadRecords() {
             const listDiv = document.getElementById('records-list');
             let records = JSON.parse(localStorage.getItem('daily_records') || '[]');
@@ -533,35 +706,9 @@ textarea {
                 return;
             }
 
-            const startDate = new Date(startDateStr);
-            
-            // Map records with calculated day and week and accumulated deaths
-            let accumulatedDeaths = 0;
-            let processedRecords = records.map(r => {
-                const rDate = new Date(r.date);
-                const diffTime = rDate - startDate;
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-                const dayNum = diffDays > 0 ? diffDays : 1;
-                const weekNum = Math.floor((dayNum - 1) / 7) + 1;
-                const totalEggs = Math.max(0, r.b1.eggs + r.b2.eggs + r.b3.eggs - (parseFloat(r.wasted) || 0));
-                const totalDeaths = r.b1.deaths + r.b2.deaths + r.b3.deaths;
-                
-                accumulatedDeaths += totalDeaths;
-                const remainingBirds = Math.max(0, totalBirds - accumulatedDeaths);
-
-                return { ...r, dayNum, weekNum, totalEggs, totalDeaths, accumulatedDeaths, remainingBirds };
-            });
-
-            // Calculate weekly totals and weekly average remaining birds
-            let weeklyData = {};
-            processedRecords.forEach(r => {
-                if (!weeklyData[r.weekNum]) {
-                    weeklyData[r.weekNum] = { eggs: 0, totalRemaining: 0, count: 0 };
-                }
-                weeklyData[r.weekNum].eggs += r.totalEggs;
-                weeklyData[r.weekNum].totalRemaining += r.remainingBirds;
-                weeklyData[r.weekNum].count += 1;
-            });
+            const calculations = calculateFarmRecords(records, startDateStr, totalBirds);
+            const processedRecords = calculations.processedRecords;
+            const weeklyData = calculations.weeklyData;
 
             const isInspectorView = typeof inspectorMode !== 'undefined' && inspectorMode;
             let html = `<table>
@@ -577,12 +724,14 @@ textarea {
                     ${isInspectorView ? '' : '<th>إجراء</th>'}
                 </tr>`;
             
-            processedRecords.forEach(r => {
-                const prodRateDaily = r.remainingBirds > 0 ? ((r.totalEggs * 30) / r.remainingBirds * 100).toFixed(2) : 0;
+            // Display newest day first for both manager and inspector without changing stored data.
+            const displayRecords = [...processedRecords].sort((a, b) => new Date(b.date) - new Date(a.date));
+            displayRecords.forEach(r => {
+                const prodRateDaily = calculations.rate(r.totalEggs, r.remainingBirds).toFixed(2);
                 
                 const weeklyTotalEggs = weeklyData[r.weekNum] ? weeklyData[r.weekNum].eggs : 0;
-                const avgWeeklyRemaining = weeklyData[r.weekNum] ? (weeklyData[r.weekNum].totalRemaining / weeklyData[r.weekNum].count) : totalBirds;
-                const prodRateWeekly = avgWeeklyRemaining > 0 ? ((weeklyTotalEggs * 30) / (avgWeeklyRemaining * 7) * 100).toFixed(2) : 0;
+                const weeklyBirdDays = weeklyData[r.weekNum] ? weeklyData[r.weekNum].birdDays : 0;
+                const prodRateWeekly = calculations.rate(weeklyTotalEggs, weeklyBirdDays).toFixed(2);
 
                 html += `<tr>
                     ${isInspectorView ? '' : `<td>${r.dayNum}</td>`}
@@ -597,17 +746,11 @@ textarea {
                 </tr>`;
             });
 
-            // Grand totals
-            let grandTotalEggs = 0;
-            let finalAccumulatedDeaths = 0;
-            processedRecords.forEach(r => {
-                grandTotalEggs += r.totalEggs;
-                finalAccumulatedDeaths = r.accumulatedDeaths;
-            });
-            
-            const finalRemainingBirds = Math.max(0, totalBirds - finalAccumulatedDeaths);
-            const totalDaysCount = processedRecords.length;
-            const overallProdRate = (totalDaysCount > 0 && finalRemainingBirds > 0) ? ((grandTotalEggs * 30) / (finalRemainingBirds * totalDaysCount) * 100).toFixed(2) : 0;
+            // الإجماليات محسوبة على التسلسل الزمني، لا على ترتيب العرض.
+            const grandTotalEggs = calculations.grandTotalEggs;
+            const finalAccumulatedDeaths = calculations.grandTotalDeaths;
+            const finalRemainingBirds = calculations.finalRemainingBirds;
+            const overallProdRate = calculations.overallProdRate.toFixed(2);
 
             if (!isInspectorView) {
                 html += `<tr style="background-color: #f1f8e9; font-weight: bold;">
@@ -637,25 +780,8 @@ textarea {
                 return;
             }
 
-            const startDate = new Date(startDateStr);
-            let accumulatedDeaths = 0;
-            let processedRecords = records.map(r => {
-                const rDate = new Date(r.date);
-                const diffTime = rDate - startDate;
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-                const dayNum = diffDays > 0 ? diffDays : 1;
-                const weekNum = Math.floor((dayNum - 1) / 7) + 1;
-                const totalEggs = Math.max(0, r.b1.eggs + r.b2.eggs + r.b3.eggs - (parseFloat(r.wasted) || 0));
-                const totalDeaths = r.b1.deaths + r.b2.deaths + r.b3.deaths;
-                
-                accumulatedDeaths += totalDeaths;
-                const remainingBirds = Math.max(0, totalBirds - accumulatedDeaths);
-                
-                // Extract Year-Month for grouping e.g. "2026-03"
-                const yearMonth = r.date.substring(0, 7);
-
-                return { ...r, dayNum, weekNum, totalEggs, totalDeaths, accumulatedDeaths, remainingBirds, yearMonth };
-            });
+            const calculations = calculateFarmRecords(records, startDateStr, totalBirds);
+            const processedRecords = calculations.processedRecords;
 
             // Group by Year-Month
             let monthsGroups = {};
@@ -668,6 +794,7 @@ textarea {
 
             // Create a new window for printing formatted as PDF pages
             let printWindow = window.open('', '_blank');
+            if (!printWindow) { alert('يرجى السماح بفتح النوافذ المنبثقة لتصدير PDF.'); return; }
             let htmlContent = `<!DOCTYPE html>
             <html lang="ar" dir="rtl">
             <head>
@@ -692,7 +819,7 @@ textarea {
 
             // Arabic month names mapping
             const monthNames = {
-                "01": "جانفي", "02": "فيففري", "03": "مارس", "04": "أفريل", 
+                "01": "جانفي", "02": "فيفري", "03": "مارس", "04": "أفريل", 
                 "05": "ماي", "06": "جوان", "07": "جويلية", "08": "أوت", 
                 "09": "سبتمبر", "10": "أكتوبر", "11": "نوفمبر", "12": "ديسمبر"
             };
@@ -721,12 +848,14 @@ textarea {
 
                 let monthTotalEggs = 0;
                 let monthTotalDeaths = 0;
+                let monthBirdDays = 0;
                 let lastRemaining = totalBirds;
 
                 monthsGroups[ym].forEach(r => {
-                    const prodRateDaily = r.remainingBirds > 0 ? ((r.totalEggs * 30) / r.remainingBirds * 100).toFixed(2) : 0;
+                    const prodRateDaily = calculations.rate(r.totalEggs, r.remainingBirds).toFixed(2);
                     monthTotalEggs += r.totalEggs;
                     monthTotalDeaths += r.totalDeaths;
+                    monthBirdDays += r.remainingBirds;
                     lastRemaining = r.remainingBirds;
 
                     htmlContent += `<tr>
@@ -743,8 +872,7 @@ textarea {
                 });
 
                 const monthDaysCount = monthsGroups[ym].length;
-                const monthAvgRemaining = lastRemaining;
-                const monthProdRate = (monthDaysCount > 0 && monthAvgRemaining > 0) ? ((monthTotalEggs * 30) / (monthAvgRemaining * monthDaysCount) * 100).toFixed(2) : 0;
+                const monthProdRate = calculations.rate(monthTotalEggs, monthBirdDays).toFixed(2);
 
                 htmlContent += `<tr style="background-color: #f1f8e9; font-weight: bold;">
                     <td colspan="${inspectorMode ? 5 : 6}" style="text-align: left;">إجمالي الشهر:</td>
@@ -766,134 +894,97 @@ textarea {
 
 
         function exportToExcel() {
-            let records = JSON.parse(localStorage.getItem('daily_records') || '[]');
+            let records;
+            try {
+                records = JSON.parse(localStorage.getItem('daily_records') || '[]');
+            } catch (error) {
+                alert('تعذر قراءة السجلات اليومية. لم يتم تصدير أي بيانات.');
+                return;
+            }
+            if (!Array.isArray(records) || records.length === 0) {
+                alert('لا توجد بيانات لتصديرها!');
+                return;
+            }
+            if (typeof XLSX === 'undefined' || !XLSX.utils) {
+                alert('مكتبة Excel غير متاحة. تحقق من اتصال الإنترنت ثم أعد المحاولة.');
+                return;
+            }
+
             const startDateStr = localStorage.getItem('start_date') || document.getElementById('start-date').value;
             const totalBirds = parseFloat(localStorage.getItem('bird_count')) || 13000;
             const flockName = localStorage.getItem('flock_name') || 'عنبر الدجاج البياض';
             const birdBreed = localStorage.getItem('bird_breed') || '-';
-            
-            if (records.length === 0) {
-                alert('لا توجد بيانات لتصديرها!');
-                return;
-            }
+            const calculations = calculateFarmRecords(records, startDateStr, totalBirds);
+            const weeklyData = calculations.weeklyData;
+            const displayRecords = [...calculations.processedRecords].sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+            const excelData = [];
 
-            const startDate = new Date(startDateStr);
-            let excelData = [];
-
-            // Title and Info headers
-            excelData.push(["إدارة عنبر الدجاج البياض - تقرير الدورة الشامل"]);
-            excelData.push(["اسم الدورة:", flockName, "نوع الطيور:", birdBreed, "العدد الإجمالي:", totalBirds]);
+            excelData.push(['إدارة عنبر الدجاج البياض - تقرير الدورة الشامل']);
+            excelData.push(['اسم الدورة:', flockName, 'نوع الطيور:', birdBreed, 'العدد الإجمالي:', calculations.totalBirds]);
             excelData.push([]);
-
-            // Table Column Headers
             excelData.push(inspectorMode ? [
-                "تاريخ اليوم", "الأسبوع",
-                "أطباق ب 1", "وفيات ب 1",
-                "أطباق ب 2", "وفيات ب 2",
-                "أطباق ب 3", "وفيات ب 3",
-                "إجمالي أطباق", "إجمالي وفيات", "الطيور المتبقية"
+                'تاريخ اليوم', 'الأسبوع',
+                'أطباق ب 1', 'وفيات ب 1',
+                'أطباق ب 2', 'وفيات ب 2',
+                'أطباق ب 3', 'وفيات ب 3',
+                'إجمالي أطباق', 'إجمالي وفيات', 'الطيور المتبقية'
             ] : [
-                "اليوم", "تاريخ اليوم", "الأسبوع",
-                "أطباق ب 1", "وفيات ب 1",
-                "أطباق ب 2", "وفيات ب 2",
-                "أطباق ب 3", "وفيات ب 3",
-                "إجمالي أطباق", "إجمالي وفيات",
-                "الطيور المتبقية", "أطباق مستهلكة / ضائعة",
-                "نسبة الإنتاج اليومية (%)",
-                "إجمالي أطباق الأسبوع", "نسبة الإنتاج الأسبوعية (%)"
+                'اليوم', 'تاريخ اليوم', 'الأسبوع',
+                'أطباق ب 1', 'وفيات ب 1',
+                'أطباق ب 2', 'وفيات ب 2',
+                'أطباق ب 3', 'وفيات ب 3',
+                'إجمالي أطباق', 'إجمالي وفيات',
+                'الطيور المتبقية', 'أطباق مستهلكة / ضائعة',
+                'نسبة الإنتاج اليومية (%)',
+                'إجمالي أطباق الأسبوع', 'نسبة الإنتاج الأسبوعية (%)'
             ]);
 
-            let accumulatedDeaths = 0;
-            let processedRecords = records.map(r => {
-                const rDate = new Date(r.date);
-                const diffTime = rDate - startDate;
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-                const dayNum = diffDays > 0 ? diffDays : 1;
-                const weekNum = Math.floor((dayNum - 1) / 7) + 1;
-                const totalEggs = Math.max(0, r.b1.eggs + r.b2.eggs + r.b3.eggs - (parseFloat(r.wasted) || 0));
-                const totalDeaths = r.b1.deaths + r.b2.deaths + r.b3.deaths;
-                
-                accumulatedDeaths += totalDeaths;
-                const remainingBirds = Math.max(0, totalBirds - accumulatedDeaths);
-
-                return { ...r, dayNum, weekNum, totalEggs, totalDeaths, accumulatedDeaths, remainingBirds };
-            });
-
-            // Weekly data calculation
-            let weeklyData = {};
-            processedRecords.forEach(r => {
-                if (!weeklyData[r.weekNum]) {
-                    weeklyData[r.weekNum] = { eggs: 0, totalRemaining: 0, count: 0 };
-                }
-                weeklyData[r.weekNum].eggs += r.totalEggs;
-                weeklyData[r.weekNum].totalRemaining += r.remainingBirds;
-                weeklyData[r.weekNum].count += 1;
-            });
-
-            processedRecords.forEach(r => {
-                const prodRateDaily = r.remainingBirds > 0 ? ((r.totalEggs * 30) / r.remainingBirds * 100).toFixed(2) : 0;
-                const weeklyTotalEggs = weeklyData[r.weekNum] ? weeklyData[r.weekNum].eggs : 0;
-                const avgWeeklyRemaining = weeklyData[r.weekNum] ? (weeklyData[r.weekNum].totalRemaining / weeklyData[r.weekNum].count) : totalBirds;
-                const prodRateWeekly = avgWeeklyRemaining > 0 ? ((weeklyTotalEggs * 30) / (avgWeeklyRemaining * 7) * 100).toFixed(2) : 0;
-
+            displayRecords.forEach(r => {
+                const prodRateDaily = calculations.rate(r.totalEggs, r.remainingBirds).toFixed(2);
+                const week = weeklyData[r.weekNum] || { eggs: 0, birdDays: 0 };
+                const prodRateWeekly = calculations.rate(week.eggs, week.birdDays).toFixed(2);
                 excelData.push(inspectorMode ? [
-                    r.date,
-                    r.weekNum,
-                    r.b1.eggs,
-                    r.b1.deaths,
-                    r.b2.eggs,
-                    r.b2.deaths,
-                    r.b3.eggs,
-                    r.b3.deaths,
-                    r.totalEggs,
-                    r.totalDeaths,
-                    r.remainingBirds
+                    r.date, r.weekNum,
+                    r.b1.eggs, r.b1.deaths,
+                    r.b2.eggs, r.b2.deaths,
+                    r.b3.eggs, r.b3.deaths,
+                    r.totalEggs, r.totalDeaths, r.remainingBirds
                 ] : [
-                    r.dayNum,
-                    r.date,
-                    r.weekNum,
-                    r.b1.eggs,
-                    r.b1.deaths,
-                    r.b2.eggs,
-                    r.b2.deaths,
-                    r.b3.eggs,
-                    r.b3.deaths,
-                    r.totalEggs,
-                    r.totalDeaths,
-                    r.remainingBirds,
-                    r.wasted || 0,
-                    prodRateDaily + '%',
-                    weeklyTotalEggs,
+                    r.dayNum, r.date, r.weekNum,
+                    r.b1.eggs, r.b1.deaths,
+                    r.b2.eggs, r.b2.deaths,
+                    r.b3.eggs, r.b3.deaths,
+                    r.totalEggs, r.totalDeaths,
+                    r.remainingBirds, r.wasted,
+                    prodRateDaily + '%', week.eggs,
                     prodRateWeekly + '%'
                 ]);
             });
 
-            // Grand totals summary row
-            let grandTotalEggs = 0;
-            let finalAccumulatedDeaths = 0;
-            processedRecords.forEach(r => {
-                grandTotalEggs += r.totalEggs;
-                finalAccumulatedDeaths = r.accumulatedDeaths;
-            });
-            const finalRemainingBirds = Math.max(0, totalBirds - finalAccumulatedDeaths);
-            const totalDaysCount = processedRecords.length;
-            const overallProdRate = (totalDaysCount > 0 && finalRemainingBirds > 0) ? ((grandTotalEggs * 30) / (finalRemainingBirds * totalDaysCount) * 100).toFixed(2) : 0;
-
-            excelData.push([]);
             if (!inspectorMode) {
+                excelData.push([]);
                 excelData.push([
-                    "الإجمالي الكلي", "", "", "", "", "", "", "", "",
-                    grandTotalEggs, finalAccumulatedDeaths, finalRemainingBirds, "",
-                    "نسبة الإنتاج الكلية: " + overallProdRate + "%", "", ""
+                    'الإجمالي الكلي', '', '', '', '', '', '', '', '',
+                    calculations.grandTotalEggs,
+                    calculations.grandTotalDeaths,
+                    calculations.finalRemainingBirds,
+                    '',
+                    'نسبة الإنتاج الكلية: ' + calculations.overallProdRate.toFixed(2) + '%',
+                    '', ''
                 ]);
             }
 
-            const ws = XLSX.utils.aoa_to_sheet(excelData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "تقرير العنبر الشامل");
-            
-            XLSX.writeFile(wb, "Layer_Farm_Comprehensive_Report.xlsx");
+            try {
+                const ws = XLSX.utils.aoa_to_sheet(excelData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'تقرير العنبر الشامل');
+                XLSX.writeFile(wb, 'Layer_Farm_Comprehensive_Report.xlsx');
+            } catch (error) {
+                console.error('Excel export error:', error);
+                alert('تعذر إنشاء ملف Excel. حاول مجددًا بعد التأكد من توفر مساحة كافية.');
+            }
         }
+
     </script>
 
 <script>
@@ -904,8 +995,11 @@ let inspectorCreatorAuth = null;
 let inspectorLiveUnsubscribe = null;
 function inspectorMsg(message) { const el=document.getElementById('inspectorMessage'); if(el) el.textContent=message || ''; }
 function applyInspectorView() {
+  document.body.classList.toggle('inspector-mode', !!inspectorMode);
   const panel=document.getElementById('inspectorManagerPanel');
-  if(panel) panel.style.display=inspectorMode ? 'none' : 'block';
+  // تبقى واجهة إضافة المعاين مخفية افتراضياً، ولا تظهر إلا عبر زر الإضافة.
+  // في حساب المعاين نفسه تُخفى دائماً.
+  if(panel && inspectorMode) panel.style.display='none';
   const navItems=[...document.querySelectorAll('.nav-item')];
   navItems.forEach(item=>{ const tab=item.getAttribute('data-tab'); item.style.display=(inspectorMode && tab!=='view')?'none':''; });
   ['tab-flock','tab-daily'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display=inspectorMode?'none':''; });
@@ -965,63 +1059,66 @@ const firebaseConfig = {
   measurementId: "G-HN77EKJ0F8"
 };
 const cloudKeys = ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records','flock_locked'];
-let cloudUser = null, cloudDb = null, cloudEnabled = false, cloudHydrating = false, cloudSaveTimer = null;
-function cloudConfigured(){ return firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith('YOUR_') && firebaseConfig.projectId && !firebaseConfig.projectId.startsWith('YOUR_'); }
-function cloudMsg(t){ const el=document.getElementById('cloudMessage'); if(el) el.textContent=t; }
-function cloudStatusMsg(t){ const el=document.getElementById('cloudStatus'); if(!el) return; const btn=document.getElementById('cloudLogout'); if(btn && btn.parentElement===el){ const first=el.firstChild; if(first && first.nodeType===Node.TEXT_NODE) first.nodeValue=t+' '; else el.insertBefore(document.createTextNode(t+' '),btn); } else { el.textContent=t; } }
-function cloudRequireLogin(message){ const overlay=document.getElementById('cloudLogin'); if(overlay) overlay.style.display='flex'; const status=document.getElementById('cloudStatus'); if(status) status.style.display='block'; cloudStatusMsg('🔒 يلزم تسجيل الدخول لاستخدام التطبيق'); if(message) cloudMsg(message); const logout=document.getElementById('cloudLogout'); if(logout) logout.style.display='none'; }
-function cloudSignOut(){ if(firebase && firebase.auth) firebase.auth().signOut().catch(err=>cloudMsg(cloudError(err))); }
-async function cloudSignIn(){ const e=document.getElementById('cloudEmail').value.trim(), p=document.getElementById('cloudPassword').value; if(!e||!p){cloudMsg('أدخل البريد الإلكتروني وكلمة المرور.');return;} if(typeof firebase==='undefined' || !firebase.auth){cloudMsg('تعذر تحميل Firebase. تحقق من الإنترنت، ثم افتح التطبيق من رابط الاستضافة HTTPS.');return;} cloudMsg('جارٍ تسجيل الدخول...'); try { await firebase.auth().signInWithEmailAndPassword(e,p); } catch(err){ cloudMsg(cloudError(err)); } }
-function cloudSignUp(){ const e=document.getElementById('cloudEmail').value.trim(), p=document.getElementById('cloudPassword').value; if(!e||!p){cloudMsg('أدخل البريد الإلكتروني وكلمة المرور.');return;} if(p.length<6){cloudMsg('يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.');return;} cloudMsg('جارٍ إنشاء الحساب...'); firebase.auth().createUserWithEmailAndPassword(e,p).catch(err=>cloudMsg(cloudError(err))); }
-function cloudError(err){ const m={ 'auth/invalid-email':'البريد الإلكتروني غير صحيح.','auth/email-already-in-use':'هذا البريد مسجل مسبقاً. جرّب تسجيل الدخول.','auth/weak-password':'كلمة المرور ضعيفة؛ استخدم 6 أحرف على الأقل.','auth/invalid-credential':'بيانات الدخول غير صحيحة.','auth/network-request-failed':'تحقق من اتصال الإنترنت.','auth/operation-not-allowed':'فعّل طريقة الدخول بالبريد وكلمة المرور في Firebase.'}; return m[err.code] || ('تعذر إكمال العملية: '+err.message); }
-function cloudSaveSoon(){ if(!cloudEnabled || !cloudUser || cloudHydrating) return; clearTimeout(cloudSaveTimer); cloudSaveTimer=setTimeout(async()=>{ try { const data={}; cloudKeys.forEach(k=>{const v=localStorage.getItem(k); if(v!==null){try{data[k]=JSON.parse(v)}catch{data[k]=v}}}); data.updatedAt=firebase.firestore.FieldValue.serverTimestamp(); await cloudDb.collection('users').doc(cloudUser.uid).set(data,{merge:true}); cloudStatusMsg('☁️ تمت مزامنة البيانات سحابياً'); } catch(e){ cloudStatusMsg('⚠️ فشلت المزامنة السحابية: '+e.message); } },700); }
-// Keep the app's existing localStorage behavior, and sync saved changes when signed in.
+let cloudUser=null, cloudDb=null, cloudEnabled=false, cloudHydrating=false, cloudSaveTimer=null, cloudSyncing=false, cloudAuthFlow=false;
+const LOCAL_SESSION_KEY='layerfarm_offline_session_v2';
+const LEGACY_SESSION_KEY='layerfarm_offline_session_v1';
+const LEGACY_PENDING_KEY='layerfarm_sync_pending_v1';
+const ACCOUNT_CACHE_PREFIX='layerfarm_account_data_v2_';
+const ACCOUNT_BASE_PREFIX='layerfarm_account_base_v2_';
+const ACCOUNT_PENDING_PREFIX='layerfarm_account_pending_v2_';
+let activeCacheUid=null;
+let activeRole='manager';
+let activeOwnerUid=null;
 const originalSetItem=Storage.prototype.setItem;
-Storage.prototype.setItem=function(key,value){ originalSetItem.call(this,key,value); if(this===localStorage && cloudKeys.includes(key)) cloudSaveSoon(); };
-async function cloudAfterLogin(user){
-  cloudUser=user; cloudHydrating=true;
-  try {
-    // إذا كان الحساب معاينًا، اقرأ بيانات المدير ولا تزامن أي شيء إلى حساب المعاين.
-    const inspectorSnap=await cloudDb.collection('inspectors').doc(user.uid).get();
-    if(inspectorSnap.exists && inspectorSnap.data().role==='inspector' && inspectorSnap.data().active!==false){
-      inspectorMode=true; inspectorManagerUid=inspectorSnap.data().managerUid;
-      if(!inspectorManagerUid) throw new Error('حساب المعاينة غير مرتبط بحساب مدير.');
-      const managerSnap=await cloudDb.collection('users').doc(inspectorManagerUid).get();
-      if(!managerSnap.exists) throw new Error('لم يتم العثور على بيانات المدير في السحابة.');
-      const data=managerSnap.data();
-      cloudKeys.forEach(k=>{ if(Object.prototype.hasOwnProperty.call(data,k)){ const v=data[k]; originalSetItem.call(localStorage,k,typeof v==='string' && k!=='daily_records' ? v : JSON.stringify(v)); } else { localStorage.removeItem(k); } });
-      if(inspectorLiveUnsubscribe) inspectorLiveUnsubscribe();
-      inspectorLiveUnsubscribe=cloudDb.collection('users').doc(inspectorManagerUid).onSnapshot(snap=>{
-        if(!inspectorMode || !snap.exists) return;
-        const latest=snap.data();
-        cloudKeys.forEach(k=>{ if(Object.prototype.hasOwnProperty.call(latest,k)){ const v=latest[k]; originalSetItem.call(localStorage,k,typeof v==='string' && k!=='daily_records' ? v : JSON.stringify(v)); } else { localStorage.removeItem(k); } });
-        if(typeof loadRecords==='function') loadRecords();
-      }, err=>cloudStatusMsg('⚠️ تعذر تحديث بيانات المعاينة مباشرة: '+err.message));
-      cloudEnabled=false;
-      document.getElementById('cloudLogin').style.display='none';
-      document.getElementById('cloudStatus').style.display='block';
-      cloudStatusMsg('👁️ حساب معاينة للقراءة فقط: '+(user.email||''));
-      const logout=document.getElementById('cloudLogout'); if(logout) logout.style.display='inline-block';
-      if(typeof window.onload==='function') window.onload();
-      applyInspectorView();
-      switchTab('view', document.querySelector('.nav-item[data-tab="view"]'));
-      return;
-    }
-    inspectorMode=false; inspectorManagerUid=null; if(inspectorLiveUnsubscribe){inspectorLiveUnsubscribe(); inspectorLiveUnsubscribe=null;}
-    const ref=cloudDb.collection('users').doc(user.uid); const snap=await ref.get();
-    if(snap.exists){ const data=snap.data(); cloudKeys.forEach(k=>{ if(Object.prototype.hasOwnProperty.call(data,k)){ const v=data[k]; originalSetItem.call(localStorage,k,typeof v==='string' && k!=='daily_records' ? v : JSON.stringify(v)); } else { localStorage.removeItem(k); } }); }
-    else { const data={}; cloudKeys.forEach(k=>{const v=localStorage.getItem(k); if(v!==null){try{data[k]=JSON.parse(v)}catch{data[k]=v}}}); data.createdAt=firebase.firestore.FieldValue.serverTimestamp(); await ref.set(data,{merge:true}); }
-    cloudEnabled=true; document.getElementById('cloudLogin').style.display='none'; document.getElementById('cloudStatus').style.display='block'; cloudStatusMsg('☁️ متصل بالسحابة: '+(user.email||'حسابك'));
-    const logout=document.getElementById('cloudLogout'); if(logout) logout.style.display='inline-block';
-    if(typeof window.onload==='function') window.onload();
-    applyInspectorView();
-  } catch(e){ cloudEnabled=false; cloudMsg('تعذر تحميل البيانات من السحابة: '+e.message); document.getElementById('cloudLogin').style.display='flex'; }
-  finally { cloudHydrating=false; }
-}
-window.addEventListener('load',()=>{
-  if(!cloudConfigured()){ cloudRequireLogin('⚠️ تسجيل الدخول غير متاح بعد: يجب إعداد بيانات Firebase داخل app/src/main/assets/index.html ثم إعادة بناء التطبيق.'); return; }
-  try { firebase.initializeApp(firebaseConfig); cloudDb=firebase.firestore(); document.getElementById('cloudLogin').style.display='flex'; document.getElementById('cloudStatus').style.display='block'; cloudStatusMsg('☁️ التخزين السحابي'); firebase.auth().onAuthStateChanged(user=>{ if(user) cloudAfterLogin(user); else { cloudUser=null; cloudEnabled=false; cloudRequireLogin('سجّل الدخول للمتابعة.'); } }); } catch(e){ cloudRequireLogin('خطأ في إعداد Firebase: '+e.message); }
-});
+const originalRemoveItem=Storage.prototype.removeItem;
+const originalClear=Storage.prototype.clear;
+function cloudConfigured(){return !!(firebaseConfig.apiKey&&!firebaseConfig.apiKey.startsWith('YOUR_')&&firebaseConfig.projectId&&!firebaseConfig.projectId.startsWith('YOUR_'));}
+function cloudMsg(t){const el=document.getElementById('cloudMessage');if(el)el.textContent=t;}
+function setSyncButton(text,state='offline',disabled=false){const b=document.getElementById('syncStatusButton');if(!b)return;b.textContent=text;b.dataset.state=state;b.disabled=!!disabled;b.style.background=state==='online'?'#ffffff25':state==='syncing'?'#f9a82555':state==='error'?'#c6282855':'#ffffff1c';}
+function cloudStatusMsg(t){const el=document.getElementById('cloudStatus');if(el){const btn=document.getElementById('cloudLogout');if(btn&&btn.parentElement===el){const first=el.firstChild;if(first&&first.nodeType===Node.TEXT_NODE)first.nodeValue=t+' ';else el.insertBefore(document.createTextNode(t+' '),btn);}else el.textContent=t;}if(/جارٍ مزامنة|جاري مزامنة/.test(t))setSyncButton('◌ جارٍ المزامنة','syncing',true);else if(/فشلت|تعذر|تعارض|خطأ/.test(t))setSyncButton('● يلزم حل مشكلة المزامنة','error',false);else if(!navigator.onLine)setSyncButton('● غير متصل – حفظ محلي','offline',false);else setSyncButton('● متصل – اضغط للمزامنة','online',false);}
+function accountKey(prefix,uid){return prefix+String(uid||'').replace(/[^a-zA-Z0-9_-]/g,'_');}
+function safeParse(v,fallback=null){try{return v==null?fallback:JSON.parse(v);}catch(_){return fallback;}}
+function readOfflineSession(){return safeParse(localStorage.getItem(LOCAL_SESSION_KEY)||localStorage.getItem(LEGACY_SESSION_KEY),null);}
+function saveOfflineSession(user,role,managerUid){const session={uid:user.uid,email:user.email||'',role:role||'manager',managerUid:managerUid||null,savedAt:Date.now()};originalSetItem.call(localStorage,LOCAL_SESSION_KEY,JSON.stringify(session));}
+function readAccountObject(prefix,uid){return safeParse(localStorage.getItem(accountKey(prefix,uid)),null);}
+function writeAccountObject(prefix,uid,obj){originalSetItem.call(localStorage,accountKey(prefix,uid),JSON.stringify(obj));}
+function buildLocalCloudData(){const data={};cloudKeys.forEach(k=>{const v=localStorage.getItem(k);if(v!==null)data[k]=safeParse(v,v);});return data;}
+function stableValue(v){if(v===undefined)return {__missing:true};if(Array.isArray(v))return v.map(stableValue);if(v&&typeof v==='object'){const out={};Object.keys(v).sort().forEach(k=>out[k]=stableValue(v[k]));return out;}return v;}
+function sameValue(a,b){return JSON.stringify(stableValue(a))===JSON.stringify(stableValue(b));}
+function applyDataToWorkingStore(data){cloudHydrating=true;try{cloudKeys.forEach(k=>{if(Object.prototype.hasOwnProperty.call(data||{},k)){const v=data[k];originalSetItem.call(localStorage,k,typeof v==='string'&&k!=='daily_records'?v:JSON.stringify(v));}else originalRemoveItem.call(localStorage,k);});}finally{cloudHydrating=false;}if(typeof loadRecords==='function')loadRecords();if(typeof window.onload==='function')window.onload();}
+function persistAccountCache(){if(!activeCacheUid||cloudHydrating)return;try{writeAccountObject(ACCOUNT_CACHE_PREFIX,activeCacheUid,buildLocalCloudData());}catch(e){console.error('Local account cache failed',e);cloudStatusMsg('⚠️ مساحة التخزين المحلية غير كافية؛ لا تغلق التطبيق قبل حل المشكلة.');}}
+function isAccountPending(uid=activeCacheUid){return !!(uid&&localStorage.getItem(accountKey(ACCOUNT_PENDING_PREFIX,uid))==='1');}
+function markAccountPending(){if(!activeCacheUid||activeRole!=='manager'||cloudHydrating)return;try{persistAccountCache();originalSetItem.call(localStorage,accountKey(ACCOUNT_PENDING_PREFIX,activeCacheUid),'1');}catch(e){console.error(e);}}
+function clearAccountPending(uid=activeCacheUid){if(uid)originalRemoveItem.call(localStorage,accountKey(ACCOUNT_PENDING_PREFIX,uid));}
+function cloudRequireLogin(message){const cached=readOfflineSession(),overlay=document.getElementById('cloudLogin');if(!navigator.onLine&&cached){restoreOfflineAccount(cached);if(overlay)overlay.style.display='none';const st=document.getElementById('cloudStatus');if(st)st.style.display='block';cloudStatusMsg('● وضع عدم الاتصال – البيانات المحفوظة لهذا الحساب متاحة');return;}if(overlay)overlay.style.display='flex';const st=document.getElementById('cloudStatus');if(st)st.style.display='block';cloudStatusMsg('🔒 سجّل الدخول عند توفر الإنترنت');if(message)cloudMsg(message);const logout=document.getElementById('cloudLogout');if(logout)logout.style.display='none';}
+function restoreOfflineAccount(session){if(!session||!session.uid)return false;const cacheUid=session.role==='inspector'?session.uid:session.uid;const data=readAccountObject(ACCOUNT_CACHE_PREFIX,cacheUid);if(!data)return false;activeCacheUid=cacheUid;activeRole=session.role||'manager';activeOwnerUid=session.managerUid||session.uid;cloudUser=null;cloudEnabled=false;inspectorMode=activeRole==='inspector';inspectorManagerUid=inspectorMode?activeOwnerUid:null;applyDataToWorkingStore(data);applyInspectorView();if(inspectorMode)switchTab('view',document.querySelector('.nav-item[data-tab="view"]'));return true;}
+async function cloudSignOut(){if(activeRole==='manager'&&isAccountPending()){alert('توجد تغييرات لم تتم مزامنتها. اتصل بالإنترنت واضغط على مربع المزامنة قبل تسجيل الخروج.');return;}try{if(typeof firebase!=='undefined'&&firebase.auth&&navigator.onLine)await firebase.auth().signOut();originalRemoveItem.call(localStorage,LOCAL_SESSION_KEY);originalRemoveItem.call(localStorage,LEGACY_SESSION_KEY);activeCacheUid=null;activeOwnerUid=null;activeRole='manager';inspectorMode=false;inspectorManagerUid=null;const overlay=document.getElementById('cloudLogin');if(overlay)overlay.style.display='flex';cloudStatusMsg('تم تسجيل الخروج. سجّل الدخول للمتابعة.');}catch(err){cloudMsg(cloudError(err));}}
+async function cloudSignIn(){const e=document.getElementById('cloudEmail').value.trim(),p=document.getElementById('cloudPassword').value;if(!e||!p){cloudMsg('أدخل البريد الإلكتروني وكلمة المرور.');return;}if(typeof firebase==='undefined'||!firebase.auth){cloudMsg('خدمات تسجيل الدخول غير متاحة حالياً. يلزم الاتصال بالإنترنت.');return;}cloudMsg('جارٍ تسجيل الدخول...');try{await firebase.auth().signInWithEmailAndPassword(e,p);}catch(err){cloudMsg(cloudError(err));}}
+function cloudSignUp(){const e=document.getElementById('cloudEmail').value.trim(),p=document.getElementById('cloudPassword').value;if(!e||!p){cloudMsg('أدخل البريد الإلكتروني وكلمة المرور.');return;}if(p.length<6){cloudMsg('يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.');return;}firebase.auth().createUserWithEmailAndPassword(e,p).catch(err=>cloudMsg(cloudError(err)));}
+function cloudError(err){const m={'auth/invalid-email':'البريد الإلكتروني غير صحيح.','auth/email-already-in-use':'هذا البريد مسجل مسبقاً. جرّب تسجيل الدخول.','auth/weak-password':'كلمة المرور ضعيفة؛ استخدم 6 أحرف على الأقل.','auth/invalid-credential':'بيانات الدخول غير صحيحة.','auth/network-request-failed':'تحقق من اتصال الإنترنت.','auth/operation-not-allowed':'فعّل طريقة الدخول بالبريد وكلمة المرور في Firebase.'};return m[err.code]||('تعذر إكمال العملية: '+(err.message||'خطأ غير معروف'));}
+function normalizeRecordList(v){return Array.isArray(v)?v:[];}
+function mergeDailyRecords(localList,remoteList){const byDate=new Map();for(const r of normalizeRecordList(remoteList))if(r&&r.date)byDate.set(r.date,r);for(const r of normalizeRecordList(localList)){if(!r||!r.date)continue;const old=byDate.get(r.date);if(old&&!sameValue(old,r))throw new Error('تعارض في سجل يوم '+r.date+' بين الجهاز والسحابة. لم تُستبدل أي نسخة؛ احتُفظ بالبيانات المحلية لإتمام المراجعة.');if(!old)byDate.set(r.date,r);}return [...byDate.values()].sort((a,b)=>String(a.date).localeCompare(String(b.date)));}
+async function syncAccount(uid){if(!navigator.onLine)throw new Error('لا يوجد اتصال بالإنترنت.');if(!cloudUser||cloudUser.uid!==uid||!cloudDb||!cloudEnabled||activeRole!=='manager')throw new Error('المزامنة متاحة لحساب المدير المسجل فقط.');const local=buildLocalCloudData();const base=readAccountObject(ACCOUNT_BASE_PREFIX,uid)||{};const ref=cloudDb.collection('users').doc(uid);let mergedResult=null;
+ await cloudDb.runTransaction(async tx=>{const snap=await tx.get(ref);const remote=snap.exists?snap.data():{};const merged={};const conflicts=[];for(const key of cloudKeys){const lv=Object.prototype.hasOwnProperty.call(local,key)?local[key]:undefined;const bv=Object.prototype.hasOwnProperty.call(base,key)?base[key]:undefined;const rv=Object.prototype.hasOwnProperty.call(remote,key)?remote[key]:undefined;const localChanged=!sameValue(lv,bv),remoteChanged=!sameValue(rv,bv);if(!localChanged){if(rv!==undefined)merged[key]=rv;}else if(!remoteChanged||sameValue(lv,rv)){if(lv!==undefined)merged[key]=lv;}else if(key==='daily_records'){merged[key]=mergeDailyRecords(lv,rv);}else{conflicts.push(key);}}
+ if(conflicts.length)throw new Error('تعارض في بيانات: '+conflicts.join('، ')+'. لم تتم الكتابة فوق بيانات السحابة أو الجهاز. احتفظنا بالنسختين محلياً.');
+ const payload={...merged,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),_layerFarmSyncVersion:(Number(remote._layerFarmSyncVersion)||0)+1};tx.set(ref,payload,{merge:true});mergedResult=merged;});
+ if(mergedResult){applyDataToWorkingStore(mergedResult);writeAccountObject(ACCOUNT_CACHE_PREFIX,uid,mergedResult);writeAccountObject(ACCOUNT_BASE_PREFIX,uid,mergedResult);clearAccountPending(uid);}return true;}
+async function pushLocalDataToCloud(){if(!activeCacheUid)throw new Error('لا يوجد حساب محلي محدد للمزامنة.');return syncAccount(activeCacheUid);}
+function cloudSaveSoon(){if(cloudHydrating||inspectorMode||activeRole!=='manager')return;markAccountPending();if(!navigator.onLine||!cloudEnabled||!cloudUser){cloudStatusMsg('● غير متصل – حُفظت التغييرات محلياً لهذا الحساب');return;}clearTimeout(cloudSaveTimer);cloudSaveTimer=setTimeout(async()=>{try{await pushLocalDataToCloud();cloudStatusMsg('☁️ تمت مزامنة التغييرات');}catch(e){markAccountPending();cloudStatusMsg('⚠️ '+e.message);}},900);}
+async function manualCloudSync(){if(cloudSyncing)return;if(!navigator.onLine){cloudStatusMsg('● غير متصل – البيانات محفوظة محلياً');alert('لا يوجد اتصال بالإنترنت. ستبقى البيانات محفوظة على هذا الجهاز، وستتم محاولة المزامنة عند عودة الاتصال.');return;}if(!cloudUser||!cloudEnabled){if(typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser){await cloudAfterLogin(firebase.auth().currentUser);}else{const overlay=document.getElementById('cloudLogin');if(overlay)overlay.style.display='flex';cloudMsg('سجّل الدخول بالحساب نفسه الذي أُدخلت به البيانات حتى تتم مزامنتها بأمان.');return;}}if(inspectorMode||activeRole==='inspector'){cloudStatusMsg('👁️ حساب المعاينة متصل – العرض والتصدير فقط');return;}cloudSyncing=true;setSyncButton('◌ جارٍ المزامنة','syncing',true);try{await pushLocalDataToCloud();cloudStatusMsg('☁️ تمت المزامنة بنجاح');}catch(e){cloudStatusMsg('⚠️ '+e.message);alert('لم تكتمل المزامنة. لم تُحذف البيانات المحلية ولم تتم الكتابة فوق بيانات السحابة.\n'+e.message);}finally{cloudSyncing=false;setSyncButton(navigator.onLine?'● متصل – اضغط للمزامنة':'● غير متصل – حفظ محلي',navigator.onLine?'online':'offline',false);}}
+Storage.prototype.setItem=function(key,value){originalSetItem.call(this,key,value);if(this===localStorage&&cloudKeys.includes(key))cloudSaveSoon();};
+Storage.prototype.removeItem=function(key){originalRemoveItem.call(this,key);if(this===localStorage&&cloudKeys.includes(key))cloudSaveSoon();};
+Storage.prototype.clear=function(){originalClear.call(this);if(this===localStorage)cloudSaveSoon();};
+async function loadManagerAccount(user){activeCacheUid=user.uid;activeOwnerUid=user.uid;activeRole='manager';inspectorMode=false;inspectorManagerUid=null;if(inspectorLiveUnsubscribe){inspectorLiveUnsubscribe();inspectorLiveUnsubscribe=null;}const ref=cloudDb.collection('users').doc(user.uid);const snap=await ref.get();const remote=snap.exists?snap.data():{};let cached=readAccountObject(ACCOUNT_CACHE_PREFIX,user.uid);let base=readAccountObject(ACCOUNT_BASE_PREFIX,user.uid);if(!cached){const legacySession=readOfflineSession();const legacyData=buildLocalCloudData();const hasLegacy=cloudKeys.some(k=>Object.prototype.hasOwnProperty.call(legacyData,k));if(hasLegacy&&legacySession&&legacySession.uid===user.uid){cached=legacyData;writeAccountObject('layerfarm_legacy_recovery_v2_',user.uid,legacyData);writeAccountObject(ACCOUNT_CACHE_PREFIX,user.uid,cached);if(isLegacyPending()) { if(!snap.exists){base={};writeAccountObject(ACCOUNT_BASE_PREFIX,user.uid,base);originalSetItem.call(localStorage,accountKey(ACCOUNT_PENDING_PREFIX,user.uid),'1');}else{base=remote;writeAccountObject(ACCOUNT_BASE_PREFIX,user.uid,base);const legacyRecords=normalizeRecordList(cached.daily_records),remoteRecords=normalizeRecordList(remote.daily_records);const dateSet=new Map(remoteRecords.map(r=>[r.date,r]));let collision=false;for(const r of legacyRecords){if(dateSet.has(r.date)&&!sameValue(dateSet.get(r.date),r)){collision=true;break;}}if(collision){writeAccountObject('layerfarm_legacy_recovery_v2_',user.uid,cached);cached=remote;writeAccountObject(ACCOUNT_CACHE_PREFIX,user.uid,cached);cloudMsg('تم العثور على بيانات قديمة غير متطابقة. حُفظت نسخة استرداد محلية ولم نرفعها تلقائياً لتجنب فقدان البيانات.');}else{cached={...remote,daily_records:mergeDailyRecords(legacyRecords,remoteRecords)};writeAccountObject(ACCOUNT_CACHE_PREFIX,user.uid,cached);originalSetItem.call(localStorage,accountKey(ACCOUNT_PENDING_PREFIX,user.uid),'1');}}}else{base=remote;writeAccountObject(ACCOUNT_BASE_PREFIX,user.uid,base);}}}
+ if(isAccountPending(user.uid)){applyDataToWorkingStore(cached||remote);cloudEnabled=true;saveOfflineSession(user,'manager',null);await syncAccount(user.uid);}else{applyDataToWorkingStore(remote);writeAccountObject(ACCOUNT_CACHE_PREFIX,user.uid,remote);writeAccountObject(ACCOUNT_BASE_PREFIX,user.uid,remote);}
+ cloudEnabled=true;saveOfflineSession(user,'manager',null);document.getElementById('cloudLogin').style.display='none';document.getElementById('cloudStatus').style.display='block';const logout=document.getElementById('cloudLogout');if(logout)logout.style.display='inline-block';applyInspectorView();}
+function isLegacyPending(){return localStorage.getItem(LEGACY_PENDING_KEY)==='1';}
+async function loadInspectorAccount(user,managerUid){activeCacheUid=user.uid;activeOwnerUid=managerUid;activeRole='inspector';inspectorMode=true;inspectorManagerUid=managerUid;const managerSnap=await cloudDb.collection('users').doc(managerUid).get();if(!managerSnap.exists)throw new Error('لم يتم العثور على بيانات المدير في السحابة.');const data={};cloudKeys.forEach(k=>{if(Object.prototype.hasOwnProperty.call(managerSnap.data(),k))data[k]=managerSnap.data()[k];});applyDataToWorkingStore(data);writeAccountObject(ACCOUNT_CACHE_PREFIX,user.uid,data);writeAccountObject(ACCOUNT_BASE_PREFIX,user.uid,data);saveOfflineSession(user,'inspector',managerUid);if(inspectorLiveUnsubscribe)inspectorLiveUnsubscribe();inspectorLiveUnsubscribe=cloudDb.collection('users').doc(managerUid).onSnapshot(snap=>{if(!inspectorMode||!snap.exists)return;const latest={};cloudKeys.forEach(k=>{if(Object.prototype.hasOwnProperty.call(snap.data(),k))latest[k]=snap.data()[k];});applyDataToWorkingStore(latest);writeAccountObject(ACCOUNT_CACHE_PREFIX,user.uid,latest);writeAccountObject(ACCOUNT_BASE_PREFIX,user.uid,latest);},err=>cloudStatusMsg('⚠️ تعذر تحديث بيانات المعاينة مباشرة: '+err.message));cloudEnabled=false;document.getElementById('cloudLogin').style.display='none';document.getElementById('cloudStatus').style.display='block';const logout=document.getElementById('cloudLogout');if(logout)logout.style.display='inline-block';applyInspectorView();switchTab('view',document.querySelector('.nav-item[data-tab="view"]'));cloudStatusMsg('👁️ حساب معاينة متصل – عرض فقط');}
+async function cloudAfterLogin(user){if(cloudAuthFlow)return;cloudAuthFlow=true;cloudUser=user;try{const inspectorSnap=await cloudDb.collection('inspectors').doc(user.uid).get();if(inspectorSnap.exists&&inspectorSnap.data().role==='inspector'&&inspectorSnap.data().active!==false){const managerUid=inspectorSnap.data().managerUid;if(!managerUid)throw new Error('حساب المعاينة غير مرتبط بحساب مدير.');await loadInspectorAccount(user,managerUid);return;}await loadManagerAccount(user);cloudStatusMsg(isAccountPending(user.uid)?'⚠️ توجد تغييرات تنتظر المزامنة':'☁️ متصل – اضغط للمزامنة عند الحاجة');}catch(e){cloudEnabled=false;const cached=readOfflineSession();if(cached&&cached.uid===user.uid&&restoreOfflineAccount(cached)){document.getElementById('cloudLogin').style.display='none';document.getElementById('cloudStatus').style.display='block';cloudStatusMsg('● تعذر تحديث السحابة – تعمل بالنسخة المحلية المحفوظة');}else{cloudMsg('تعذر تحميل بيانات الحساب: '+e.message);document.getElementById('cloudLogin').style.display='flex';}}finally{cloudAuthFlow=false;}}
+window.addEventListener('online',()=>{cloudStatusMsg('● عاد الاتصال – جارٍ استئناف المزامنة');if(typeof firebase!=='undefined'&&firebase.auth&&firebase.auth().currentUser)cloudAfterLogin(firebase.auth().currentUser);else{const s=readOfflineSession();if(s&&s.role==='manager'&&isAccountPending(s.uid)){const overlay=document.getElementById('cloudLogin');if(overlay)overlay.style.display='flex';cloudMsg('سجّل الدخول بالحساب نفسه لإكمال مزامنة البيانات المحفوظة.');}}});
+window.addEventListener('offline',()=>{cloudEnabled=false;cloudStatusMsg('● غير متصل – تُحفظ التغييرات محلياً');});
+window.addEventListener('beforeunload',()=>{if(activeCacheUid&&activeRole==='manager')persistAccountCache();});
+window.addEventListener('load',()=>{if('serviceWorker'in navigator&&/^https?:$/.test(location.protocol)){navigator.serviceWorker.register('./service-worker.js').catch(e=>console.warn('Service worker registration failed',e));}const cached=readOfflineSession();if(!navigator.onLine){if(cached&&restoreOfflineAccount(cached)){const overlay=document.getElementById('cloudLogin');if(overlay)overlay.style.display='none';const st=document.getElementById('cloudStatus');if(st)st.style.display='block';cloudStatusMsg('● وضع عدم الاتصال – البيانات المحفوظة متاحة');}else cloudRequireLogin('يجب تسجيل الدخول مرة واحدة مع توفر الإنترنت قبل استعمال التطبيق دون اتصال.');return;}if(!cloudConfigured()||typeof firebase==='undefined'||!firebase.initializeApp){cloudRequireLogin('تعذر تحميل خدمات Firebase. تحقق من الإنترنت ثم أعد المحاولة.');return;}try{if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);cloudDb=firebase.firestore();firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});document.getElementById('cloudLogin').style.display='flex';document.getElementById('cloudStatus').style.display='block';cloudStatusMsg('● جارٍ الاتصال بالسحابة');firebase.auth().onAuthStateChanged(user=>{if(user)cloudAfterLogin(user);else{cloudUser=null;cloudEnabled=false;cloudRequireLogin('سجّل الدخول للمتابعة أو استخدم النسخة المحلية بعد تسجيل الدخول السابق.');}});}catch(e){cloudRequireLogin('تعذر الاتصال بخدمات Firebase: '+e.message);}});
 </script>
 
 </body>
