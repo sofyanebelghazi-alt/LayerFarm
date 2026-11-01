@@ -673,11 +673,14 @@ textarea {
                 const dayNum = Math.max(1, diffDays);
                 const weekNum = Math.floor((dayNum - 1) / 7) + 1;
                 const wasted = toNumber(r.wasted);
-                const totalEggs = Math.max(0, b1.eggs + b2.eggs + b3.eggs - wasted);
+                // إجمالي العنبر المعروض هو مجموع أطباق البطاريات قبل طرح المستهلك أو الضائع.
+                const totalEggsGross = b1.eggs + b2.eggs + b3.eggs;
+                // تبقى الحسابات والمؤشرات الأخرى معتمدة على الأطباق الصافية بعد الطرح.
+                const totalEggs = Math.max(0, totalEggsGross - wasted);
                 const totalDeaths = b1.deaths + b2.deaths + b3.deaths;
                 accumulatedDeaths += totalDeaths;
                 const remainingBirds = Math.max(0, totalBirds - accumulatedDeaths);
-                return { ...r, b1, b2, b3, wasted, dayNum, weekNum, totalEggs, totalDeaths, accumulatedDeaths, remainingBirds, yearMonth: String(r.date || '').substring(0, 7) };
+                return { ...r, b1, b2, b3, wasted, dayNum, weekNum, totalEggsGross, totalEggs, totalDeaths, accumulatedDeaths, remainingBirds, yearMonth: String(r.date || '').substring(0, 7) };
             });
             const weeklyData = {};
             processedRecords.forEach(r => {
@@ -740,7 +743,7 @@ textarea {
                     <td>${r.b1.eggs} / ${r.b1.deaths}</td>
                     <td>${r.b2.eggs} / ${r.b2.deaths}</td>
                     <td>${r.b3.eggs} / ${r.b3.deaths}</td>
-                    <td><b>${r.totalEggs}</b> / <b>${r.totalDeaths}</b></td>
+                    <td><b>${r.totalEggsGross}</b> / <b>${r.totalDeaths}</b></td>
                     ${isInspectorView ? '' : `<td>${r.wasted || 0}</td><td>${prodRateDaily}%</td><td><b>${weeklyTotalEggs}</b></td><td><b>${prodRateWeekly}%</b></td>`}
                     ${isInspectorView ? '' : `<td><button onclick="editRecord('${r.date}')" style="padding: 4px 8px; font-size: 0.75rem; margin-top: 0; background-color: #1976d2;">تعديل</button></td>`}
                 </tr>`;
@@ -865,7 +868,7 @@ textarea {
                         <td>${r.b1.eggs} / ${r.b1.deaths}</td>
                         <td>${r.b2.eggs} / ${r.b2.deaths}</td>
                         <td>${r.b3.eggs} / ${r.b3.deaths}</td>
-                        <td><b>${r.totalEggs}</b> / <b>${r.totalDeaths}</b></td>
+                        <td><b>${r.totalEggsGross}</b> / <b>${r.totalDeaths}</b></td>
                         <td><b>${r.remainingBirds}</b></td>
                         ${inspectorMode ? '' : `<td>${r.wasted || 0}</td><td>${prodRateDaily}%</td>`}
                     </tr>`;
@@ -948,13 +951,13 @@ textarea {
                     r.b1.eggs, r.b1.deaths,
                     r.b2.eggs, r.b2.deaths,
                     r.b3.eggs, r.b3.deaths,
-                    r.totalEggs, r.totalDeaths, r.remainingBirds
+                    r.totalEggsGross, r.totalDeaths, r.remainingBirds
                 ] : [
                     r.dayNum, r.date, r.weekNum,
                     r.b1.eggs, r.b1.deaths,
                     r.b2.eggs, r.b2.deaths,
                     r.b3.eggs, r.b3.deaths,
-                    r.totalEggs, r.totalDeaths,
+                    r.totalEggsGross, r.totalDeaths,
                     r.remainingBirds, r.wasted,
                     prodRateDaily + '%', week.eggs,
                     prodRateWeekly + '%'
