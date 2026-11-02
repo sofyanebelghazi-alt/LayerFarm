@@ -392,12 +392,26 @@ textarea {
                             <input type="date" id="start-date">
                         </div>
                         <div class="form-group">
+                            <label for="week-start-day">اليوم الذي يبدأ منه الأسبوع</label>
+                            <select id="week-start-day">
+                                <option value="6">السبت</option>
+                                <option value="0">الأحد</option>
+                                <option value="1">الإثنين</option>
+                                <option value="2">الثلاثاء</option>
+                                <option value="3">الأربعاء</option>
+                                <option value="4">الخميس</option>
+                                <option value="5">الجمعة</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label for="start-age">عمر الطيور عند البداية (بالأيام)</label>
                             <input type="number" id="start-age" value="126">
                         </div>
                     </div>
                     <button type="button" id="openInspectorScreenButton" class="inspector-open-button" onclick="showInspectorScreen()">إضافة حساب المعاين</button>
                     <button id="saveFlockButton" onclick="saveFlockInfo()">حفظ بيانات الدورة</button>
+                    <button id="editWeekStartButton" type="button" onclick="authorizeWeekStartEdit()" style="display:none;background:#1976d2;margin-top:10px;">تعديل بداية الأسبوع</button>
+                    <button id="saveWeekStartButton" type="button" onclick="saveWeekStartDay()" style="display:none;background:#2e7d32;margin-top:10px;">حفظ بداية الأسبوع</button>
                     <button id="deleteFlockButton" onclick="deleteFlockInfoPermanently()" style="display:none;background:#c62828;margin-top:10px;">حذف بيانات الدورة نهائيًا</button>
                     <p id="flockLockMessage" style="display:none;margin-top:10px;color:#555;font-size:.9rem;">بيانات الدورة محفوظة ومقفلة. لحذفها نهائيًا، اضغط زر الحذف وأدخل كلمة مرور حسابك.</p>
                 </div>
@@ -471,6 +485,8 @@ textarea {
             if(localStorage.getItem('bird_count')) document.getElementById('bird-count').value = localStorage.getItem('bird_count');
             if(localStorage.getItem('start_date')) document.getElementById('start-date').value = localStorage.getItem('start_date');
             if(localStorage.getItem('start_age')) document.getElementById('start-age').value = localStorage.getItem('start_age');
+            const savedWeekStartDay = localStorage.getItem('week_start_day');
+            document.getElementById('week-start-day').value = savedWeekStartDay !== null && /^[0-6]$/.test(savedWeekStartDay) ? savedWeekStartDay : '6';
             setFlockLocked(localStorage.getItem('flock_locked') === 'true' || !!localStorage.getItem('flock_name'));
         };
 
@@ -508,6 +524,12 @@ textarea {
                 const el = document.getElementById(id);
                 if (el) el.disabled = locked;
             });
+            const weekStartSelect = document.getElementById('week-start-day');
+            if (weekStartSelect) weekStartSelect.disabled = locked;
+            const editWeekStartBtn = document.getElementById('editWeekStartButton');
+            const saveWeekStartBtn = document.getElementById('saveWeekStartButton');
+            if (editWeekStartBtn) editWeekStartBtn.style.display = locked ? 'block' : 'none';
+            if (saveWeekStartBtn) saveWeekStartBtn.style.display = 'none';
             const saveBtn = document.getElementById('saveFlockButton');
             const deleteBtn = document.getElementById('deleteFlockButton');
             const note = document.getElementById('flockLockMessage');
@@ -526,8 +548,40 @@ textarea {
             localStorage.setItem('bird_count', document.getElementById('bird-count').value);
             localStorage.setItem('start_date', document.getElementById('start-date').value);
             localStorage.setItem('start_age', document.getElementById('start-age').value);
+            localStorage.setItem('week_start_day', document.getElementById('week-start-day').value || '6');
             setFlockLocked(true);
             alert('تم حفظ بيانات الدورة وقفلها بنجاح.');
+        }
+
+        async function authorizeWeekStartEdit() {
+            if (typeof inspectorMode !== 'undefined' && inspectorMode) { alert('حساب المعاينة للعرض فقط.'); return; }
+            const user = (typeof firebase !== 'undefined' && firebase.auth) ? firebase.auth().currentUser : null;
+            if (!user || !user.email) { alert('يجب تسجيل الدخول إلى الحساب أولًا لتعديل بداية الأسبوع.'); return; }
+            const password = prompt('أدخل كلمة مرور حسابك للسماح بتعديل بداية الأسبوع:');
+            if (password === null) return;
+            if (!password) { alert('يجب إدخال كلمة المرور.'); return; }
+            try {
+                const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
+                await user.reauthenticateWithCredential(credential);
+                document.getElementById('week-start-day').disabled = false;
+                document.getElementById('editWeekStartButton').style.display = 'none';
+                document.getElementById('saveWeekStartButton').style.display = 'block';
+            } catch (err) {
+                if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') alert('كلمة المرور غير صحيحة. لم يتم تغيير بداية الأسبوع.');
+                else alert('تعذر التحقق من كلمة المرور: ' + (err.message || 'خطأ غير معروف'));
+            }
+        }
+
+        function saveWeekStartDay() {
+            if (typeof inspectorMode !== 'undefined' && inspectorMode) { alert('حساب المعاينة للعرض فقط.'); return; }
+            const select = document.getElementById('week-start-day');
+            if (!select || !/^[0-6]$/.test(select.value)) { alert('اختر يومًا صحيحًا لبداية الأسبوع.'); return; }
+            localStorage.setItem('week_start_day', select.value);
+            select.disabled = true;
+            document.getElementById('saveWeekStartButton').style.display = 'none';
+            document.getElementById('editWeekStartButton').style.display = 'block';
+            if (typeof loadRecords === 'function') loadRecords();
+            alert('تم حفظ بداية الأسبوع وتحديث الحسابات الأسبوعية.');
         }
 
         async function deleteFlockInfoPermanently() {
@@ -544,14 +598,14 @@ textarea {
                 if (cloudDb && cloudUser && cloudUser.uid === user.uid) {
                     const del = firebase.firestore.FieldValue.delete();
                     const removal = {};
-                    ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records','flock_locked'].forEach(k => removal[k] = del);
+                    ['flock_name','bird_breed','bird_count','start_date','start_age','week_start_day','daily_records','flock_locked'].forEach(k => removal[k] = del);
                     await cloudDb.collection('users').doc(user.uid).update(removal);
                 }
                 // حذف محلي مقصود بعد نجاح الحذف السحابي: امنع مؤقتاً مشغل المزامنة
                 // حتى لا يعيد رفع البيانات المحذوفة إلى Firestore بعد انتهاء المهلة.
                 cloudHydrating = true;
                 try {
-                    ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records','flock_locked'].forEach(k => originalRemoveItem.call(localStorage, k));
+                    ['flock_name','bird_breed','bird_count','start_date','start_age','week_start_day','daily_records','flock_locked'].forEach(k => originalRemoveItem.call(localStorage, k));
                 } finally {
                     cloudHydrating = false;
                 }
@@ -566,6 +620,7 @@ textarea {
                 document.getElementById('bird-count').value = '13000';
                 document.getElementById('start-date').valueAsDate = new Date();
                 document.getElementById('start-age').value = '126';
+                document.getElementById('week-start-day').value = '6';
                 setFlockLocked(false);
                 if (typeof loadRecords === 'function') loadRecords();
                 alert('تم حذف بيانات الدورة والسجلات اليومية نهائيًا. يمكنك إدخال دورة جديدة.');
@@ -671,16 +726,20 @@ textarea {
                 const ordinal = dateOrdinal(r.date);
                 const diffDays = Number.isFinite(ordinal) && Number.isFinite(startOrdinal) ? ordinal - startOrdinal + 1 : 1;
                 const dayNum = Math.max(1, diffDays);
-                const weekNum = Math.floor((dayNum - 1) / 7) + 1;
+                const configuredWeekStart = Number(localStorage.getItem('week_start_day') || 6);
+                const weekStartDay = Number.isInteger(configuredWeekStart) && configuredWeekStart >= 0 && configuredWeekStart <= 6 ? configuredWeekStart : 6;
+                // UTC weekday: 0=Sunday ... 6=Saturday. The first partial week
+                // runs from the cycle start date through the day before the selected weekday.
+                const startWeekday = Number.isFinite(startOrdinal) ? ((startOrdinal + 4) % 7 + 7) % 7 : 6;
+                const daysUntilWeekBoundaryOffset = (startWeekday - weekStartDay + 7) % 7;
+                const weekNum = Math.floor((Math.max(0, diffDays) + daysUntilWeekBoundaryOffset) / 7) + 1;
                 const wasted = toNumber(r.wasted);
-                // إجمالي العنبر المعروض هو مجموع أطباق البطاريات قبل طرح المستهلك أو الضائع.
-                const totalEggsGross = b1.eggs + b2.eggs + b3.eggs;
-                // تبقى الحسابات والمؤشرات الأخرى معتمدة على الأطباق الصافية بعد الطرح.
-                const totalEggs = Math.max(0, totalEggsGross - wasted);
+                const totalCoopEggs = b1.eggs + b2.eggs + b3.eggs;
+                const totalEggs = Math.max(0, totalCoopEggs - wasted);
                 const totalDeaths = b1.deaths + b2.deaths + b3.deaths;
                 accumulatedDeaths += totalDeaths;
                 const remainingBirds = Math.max(0, totalBirds - accumulatedDeaths);
-                return { ...r, b1, b2, b3, wasted, dayNum, weekNum, totalEggsGross, totalEggs, totalDeaths, accumulatedDeaths, remainingBirds, yearMonth: String(r.date || '').substring(0, 7) };
+                return { ...r, b1, b2, b3, wasted, dayNum, weekNum, totalCoopEggs, totalEggs, totalDeaths, accumulatedDeaths, remainingBirds, yearMonth: String(r.date || '').substring(0, 7) };
             });
             const weeklyData = {};
             processedRecords.forEach(r => {
@@ -691,11 +750,12 @@ textarea {
                 weeklyData[r.weekNum].count += 1;
             });
             const grandTotalEggs = processedRecords.reduce((sum, r) => sum + r.totalEggs, 0);
+            const grandTotalCoopEggs = processedRecords.reduce((sum, r) => sum + r.totalCoopEggs, 0);
             const grandTotalDeaths = processedRecords.reduce((sum, r) => sum + r.totalDeaths, 0);
             const birdDays = processedRecords.reduce((sum, r) => sum + r.remainingBirds, 0);
             const finalRemainingBirds = processedRecords.length ? processedRecords[processedRecords.length - 1].remainingBirds : totalBirds;
             const rate = (eggs, birdsDays) => birdsDays > 0 ? (eggs * 30 / birdsDays * 100) : 0;
-            return { processedRecords, weeklyData, totalBirds, grandTotalEggs, grandTotalDeaths, birdDays, finalRemainingBirds, overallProdRate: rate(grandTotalEggs, birdDays), rate };
+            return { processedRecords, weeklyData, totalBirds, grandTotalEggs, grandTotalCoopEggs, grandTotalDeaths, birdDays, finalRemainingBirds, overallProdRate: rate(grandTotalEggs, birdDays), rate };
         }
 
         function loadRecords() {
@@ -743,7 +803,7 @@ textarea {
                     <td>${r.b1.eggs} / ${r.b1.deaths}</td>
                     <td>${r.b2.eggs} / ${r.b2.deaths}</td>
                     <td>${r.b3.eggs} / ${r.b3.deaths}</td>
-                    <td><b>${r.totalEggsGross}</b> / <b>${r.totalDeaths}</b></td>
+                    <td><b>${r.totalCoopEggs}</b> / <b>${r.totalDeaths}</b></td>
                     ${isInspectorView ? '' : `<td>${r.wasted || 0}</td><td>${prodRateDaily}%</td><td><b>${weeklyTotalEggs}</b></td><td><b>${prodRateWeekly}%</b></td>`}
                     ${isInspectorView ? '' : `<td><button onclick="editRecord('${r.date}')" style="padding: 4px 8px; font-size: 0.75rem; margin-top: 0; background-color: #1976d2;">تعديل</button></td>`}
                 </tr>`;
@@ -758,7 +818,7 @@ textarea {
             if (!isInspectorView) {
                 html += `<tr style="background-color: #f1f8e9; font-weight: bold;">
                     <td colspan="6" style="text-align: left; padding: 10px;">الإجمالي الكلي:</td>
-                    <td><b>${grandTotalEggs}</b> / <b>${finalAccumulatedDeaths}</b></td>
+                    <td><b>${calculations.grandTotalCoopEggs}</b> / <b>${finalAccumulatedDeaths}</b></td>
                     <td colspan="2">الطيور المتبقية: <b>${finalRemainingBirds}</b></td><td>نسبة الإنتاج الكلية: <b>${overallProdRate}%</b></td><td colspan="2">-</td>
                 </tr>`;
             }
@@ -850,6 +910,7 @@ textarea {
                         </tr>`;
 
                 let monthTotalEggs = 0;
+                let monthTotalCoopEggs = 0;
                 let monthTotalDeaths = 0;
                 let monthBirdDays = 0;
                 let lastRemaining = totalBirds;
@@ -857,6 +918,7 @@ textarea {
                 monthsGroups[ym].forEach(r => {
                     const prodRateDaily = calculations.rate(r.totalEggs, r.remainingBirds).toFixed(2);
                     monthTotalEggs += r.totalEggs;
+                    monthTotalCoopEggs += r.totalCoopEggs;
                     monthTotalDeaths += r.totalDeaths;
                     monthBirdDays += r.remainingBirds;
                     lastRemaining = r.remainingBirds;
@@ -868,7 +930,7 @@ textarea {
                         <td>${r.b1.eggs} / ${r.b1.deaths}</td>
                         <td>${r.b2.eggs} / ${r.b2.deaths}</td>
                         <td>${r.b3.eggs} / ${r.b3.deaths}</td>
-                        <td><b>${r.totalEggsGross}</b> / <b>${r.totalDeaths}</b></td>
+                        <td><b>${r.totalCoopEggs}</b> / <b>${r.totalDeaths}</b></td>
                         <td><b>${r.remainingBirds}</b></td>
                         ${inspectorMode ? '' : `<td>${r.wasted || 0}</td><td>${prodRateDaily}%</td>`}
                     </tr>`;
@@ -879,7 +941,7 @@ textarea {
 
                 htmlContent += `<tr style="background-color: #f1f8e9; font-weight: bold;">
                     <td colspan="${inspectorMode ? 5 : 6}" style="text-align: left;">إجمالي الشهر:</td>
-                    <td><b>${monthTotalEggs}</b> / <b>${monthTotalDeaths}</b></td>
+                    <td><b>${monthTotalCoopEggs}</b> / <b>${monthTotalDeaths}</b></td>
                     <td><b>${lastRemaining}</b></td>
                     ${inspectorMode ? '' : `<td>-</td><td>نسبة الإنتاج الشهرية: <b>${monthProdRate}%</b></td>`}
                 </tr>`;
@@ -951,13 +1013,13 @@ textarea {
                     r.b1.eggs, r.b1.deaths,
                     r.b2.eggs, r.b2.deaths,
                     r.b3.eggs, r.b3.deaths,
-                    r.totalEggsGross, r.totalDeaths, r.remainingBirds
+                    r.totalCoopEggs, r.totalDeaths, r.remainingBirds
                 ] : [
                     r.dayNum, r.date, r.weekNum,
                     r.b1.eggs, r.b1.deaths,
                     r.b2.eggs, r.b2.deaths,
                     r.b3.eggs, r.b3.deaths,
-                    r.totalEggsGross, r.totalDeaths,
+                    r.totalCoopEggs, r.totalDeaths,
                     r.remainingBirds, r.wasted,
                     prodRateDaily + '%', week.eggs,
                     prodRateWeekly + '%'
@@ -968,7 +1030,7 @@ textarea {
                 excelData.push([]);
                 excelData.push([
                     'الإجمالي الكلي', '', '', '', '', '', '', '', '',
-                    calculations.grandTotalEggs,
+                    calculations.grandTotalCoopEggs,
                     calculations.grandTotalDeaths,
                     calculations.finalRemainingBirds,
                     '',
@@ -1061,7 +1123,7 @@ const firebaseConfig = {
   appId: "1:1043960341940:web:b232cd655f02ae37d33ee1",
   measurementId: "G-HN77EKJ0F8"
 };
-const cloudKeys = ['flock_name','bird_breed','bird_count','start_date','start_age','daily_records','flock_locked'];
+const cloudKeys = ['flock_name','bird_breed','bird_count','start_date','start_age','week_start_day','daily_records','flock_locked'];
 let cloudUser=null, cloudDb=null, cloudEnabled=false, cloudHydrating=false, cloudSaveTimer=null, cloudSyncing=false, cloudAuthFlow=false;
 const LOCAL_SESSION_KEY='layerfarm_offline_session_v2';
 const LEGACY_SESSION_KEY='layerfarm_offline_session_v1';
