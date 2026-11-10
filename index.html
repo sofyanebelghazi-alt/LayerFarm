@@ -732,7 +732,7 @@ textarea {
                 // runs from the cycle start date through the day before the selected weekday.
                 const startWeekday = Number.isFinite(startOrdinal) ? ((startOrdinal + 4) % 7 + 7) % 7 : 6;
                 const daysUntilWeekBoundaryOffset = (startWeekday - weekStartDay + 7) % 7;
-                const weekNum = Math.floor((Math.max(0, diffDays) + daysUntilWeekBoundaryOffset) / 7) + 1;
+                const weekNum = Math.floor((Math.max(0, diffDays - 1) + daysUntilWeekBoundaryOffset) / 7) + 1;
                 const wasted = toNumber(r.wasted);
                 const totalCoopEggs = b1.eggs + b2.eggs + b3.eggs;
                 const totalEggs = Math.max(0, totalCoopEggs - wasted);
